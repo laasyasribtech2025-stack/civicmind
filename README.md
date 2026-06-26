@@ -326,6 +326,47 @@ Family-Concierge-AI
 ├── README.md
 │
 └── requirements.txt
+
+                     ☁️ Google Gemini
+                            ▲
+                            │
+                    🤖 Concierge AI
+                 (Master Intelligence)
+
+        ┌─────────────┼─────────────┐
+        │             │             │
+        ▼             ▼             ▼
+
+ 📚 Knowledge     🚑 Emergency    🕊 Legacy
+    Agent            Agent          Agent
+
+        ▼             ▼             ▼
+
+ 🔒 Privacy      📅 Coordinator   ⚡ Proactive
+     Agent           Agent           Agent
+
+        └─────────────┼─────────────┘
+
+              🌐 MCP Tool Layer
+
+     📂 Documents
+     🏥 Medical
+     📆 Calendar
+     📷 Memories
+     🗄 Database
+
+                 ▼
+
+        💙 Living Digital Twin
+
+                 ▼
+
+      👨 Dad 👩 Mom 👧 Daughter
+      👦 Son 👵 Grandma 👴 Grandpa
+
+                 ▼
+
+      💻 Beautiful Web Dashboard
 ```
 
 ---
