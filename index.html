@@ -275,6 +275,27 @@
               <div class="legacy-timeline" id="legacy-timeline-container">
                 <!-- Timeline items will be rendered here -->
               </div>
+
+              <!-- Upload form for adding verified memory -->
+              <div class="add-vault-item-panel" style="margin-top: 2.5rem;">
+                <h4>Record New Verified Legacy Memory</h4>
+                <div class="form-row">
+                  <input type="text" id="new-legacy-title" placeholder="Memory Title (e.g., Grandma's Childhood, Baking Lemon Tart)">
+                  <select id="new-legacy-member">
+                    <option value="Grandpa Robert">Subject: Grandpa Robert</option>
+                    <option value="Grandma Elena">Subject: Grandma Elena</option>
+                    <option value="Dad Arthur">Subject: Dad Arthur</option>
+                    <option value="Mom Sarah">Subject: Mom Sarah</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <input type="text" id="new-legacy-file" placeholder="Voice Clip File Name (e.g. grandma_meringue_recipe.wav)">
+                </div>
+                <div class="form-row">
+                  <textarea id="new-legacy-story" placeholder="Type the transcription or verified text story here..." rows="3"></textarea>
+                </div>
+                <button class="btn btn-primary" id="btn-save-legacy-item">Verify & Save Memory</button>
+              </div>
             </div>
           </div>
 

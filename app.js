@@ -334,6 +334,55 @@ document.addEventListener('DOMContentLoaded', () => {
     renderVaultList();
   });
 
+  // Form Submission for uploading Legacy items
+  document.getElementById('btn-save-legacy-item').addEventListener('click', async () => {
+    const title = document.getElementById('new-legacy-title').value.trim();
+    const subject = document.getElementById('new-legacy-member').value;
+    const voiceFile = document.getElementById('new-legacy-file').value.trim() || 'unnamed_clip.wav';
+    const storyText = document.getElementById('new-legacy-story').value.trim();
+
+    if (!title || !storyText) {
+      alert("Please fill in a title and transcription story text.");
+      return;
+    }
+
+    const newMemory = {
+      id: `legacy-story-${Date.now()}`,
+      subject: subject,
+      title: title,
+      story: storyText,
+      recordedDate: new Date().toISOString().substring(0, 10),
+      mediaType: "Audio Voice Clip",
+      mediaUrl: voiceFile,
+      verificationHash: `sha256-${Math.random().toString(16).substring(2, 18)}${Math.random().toString(16).substring(2, 18)}`,
+      verifiable: true,
+      confidenceScore: 1.00
+    };
+
+    appendTelemetryLog({
+      timestamp: new Date().toISOString().substring(11, 19),
+      type: 'system',
+      message: `Initiating hash verification check for new legacy voice clip: "${voiceFile}"`
+    });
+
+    // Insert into the simulator legacy memories list at the beginning (newest first)
+    McpSimulator.legacy.memories.unshift(newMemory);
+    
+    // Clear inputs
+    document.getElementById('new-legacy-title').value = '';
+    document.getElementById('new-legacy-file').value = '';
+    document.getElementById('new-legacy-story').value = '';
+
+    appendTelemetryLog({
+      timestamp: new Date().toISOString().substring(11, 19),
+      type: 'success-log',
+      message: `Memory verified successfully. Digital voice matches profile. Integrity hash registered.`
+    });
+
+    // Re-render timeline
+    LegacyModule.renderTimeline();
+  });
+
   // ==========================================
   // Privacy Matrix Rendering
   // ==========================================
