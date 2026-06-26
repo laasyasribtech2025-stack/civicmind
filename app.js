@@ -180,6 +180,25 @@ document.addEventListener('DOMContentLoaded', () => {
     handleRoleChange(e.target.value);
   });
 
+  // Family Cards Click Handler to Switch Roles directly by clicking on cards
+  const familyCards = [
+    { id: 'fam-dad', key: 'dad' },
+    { id: 'fam-mom', key: 'mom' },
+    { id: 'fam-son', key: 'son' },
+    { id: 'fam-daughter', key: 'daughter' },
+    { id: 'fam-grandma', key: 'grandma' }
+  ];
+
+  familyCards.forEach(card => {
+    const cardEl = document.getElementById(card.id);
+    if (cardEl) {
+      cardEl.addEventListener('click', () => {
+        roleSelector.value = card.key;
+        handleRoleChange(card.key);
+      });
+    }
+  });
+
   // Pre-highlight Dad initially
   document.getElementById('fam-dad').classList.add('active-user-highlight');
 
