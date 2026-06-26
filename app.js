@@ -926,6 +926,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ==========================================
+  // Ambient Relaxing Music Controller
+  // ==========================================
+  const bgMusic = document.getElementById('bg-relaxing-music');
+  const btnAmbient = document.getElementById('btn-ambient-music');
+
+  function toggleAmbientMusic() {
+    if (!bgMusic || !btnAmbient) return;
+    
+    const musicIcon = btnAmbient.querySelector('.music-icon');
+    const musicText = btnAmbient.querySelector('span:not(.music-icon)');
+
+    if (bgMusic.paused) {
+      bgMusic.play().then(() => {
+        btnAmbient.classList.add('playing');
+        if (musicIcon) musicIcon.innerText = '🔊';
+        if (musicText) musicText.innerText = 'Ambience: On';
+        appendTelemetryLog({
+          timestamp: new Date().toISOString().substring(11, 19),
+          type: 'success-log',
+          message: 'Ambient relaxing music started playing in background.'
+        });
+      }).catch(e => {
+        console.log("Autoplay blocked by browser policy. Interacting first required.", e);
+      });
+    } else {
+      bgMusic.pause();
+      btnAmbient.classList.remove('playing');
+      if (musicIcon) musicIcon.innerText = '🔇';
+      if (musicText) musicText.innerText = 'Ambience: Off';
+      appendTelemetryLog({
+        timestamp: new Date().toISOString().substring(11, 19),
+        type: 'system',
+        message: 'Ambient background music paused.'
+      });
+    }
+  }
+
+  if (btnAmbient) {
+    btnAmbient.addEventListener('click', toggleAmbientMusic);
+  }
+
+  // Attempt to autoplay on first user interaction anywhere on the body to bypass browser restrictions
+  document.body.addEventListener('click', () => {
+    if (bgMusic && bgMusic.paused && btnAmbient && !btnAmbient.classList.contains('playing')) {
+      bgMusic.play().then(() => {
+        btnAmbient.classList.add('playing');
+        const musicIcon = btnAmbient.querySelector('.music-icon');
+        const musicText = btnAmbient.querySelector('span:not(.music-icon)');
+        if (musicIcon) musicIcon.innerText = '🔊';
+        if (musicText) musicText.innerText = 'Ambience: On';
+        appendTelemetryLog({
+          timestamp: new Date().toISOString().substring(11, 19),
+          type: 'success-log',
+          message: 'Ambient background music activated automatically upon user interaction.'
+        });
+      }).catch(e => {
+        // Safe to ignore
+      });
+    }
+  }, { once: true });
+
   // Trigger default Proactive audit on startup
   setTimeout(async () => {
     const alerts = await AgentSystem.runProactiveAudit();

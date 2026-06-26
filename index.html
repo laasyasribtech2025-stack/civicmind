@@ -41,7 +41,7 @@
         </button>
         <button class="nav-btn" data-view="legacy">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-          <span>Memorys</span>
+          <span>Legacy Vault</span>
         </button>
         <button class="nav-btn" data-view="privacy">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -74,6 +74,12 @@
         </div>
 
         <div class="header-right">
+          <!-- Ambient Music Controller -->
+          <button id="btn-ambient-music" class="btn btn-ambient" title="Toggle background relaxing music">
+            <span class="music-icon" style="margin-right: 0.25rem;">🔇</span>
+            <span>Ambience: Off</span>
+          </button>
+
           <!-- Role Switcher -->
           <div class="role-switcher-container">
             <label for="role-selector">Active Role:</label>
@@ -419,6 +425,9 @@
     </main>
 
   </div>
+
+  <!-- Ambient looping background music -->
+  <audio id="bg-relaxing-music" loop src="https://assets.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3"></audio>
 
   <!-- Javascript Modules -->
   <script src="mcpSimulator.js"></script>
