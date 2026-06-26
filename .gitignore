@@ -1,0 +1,16 @@
+# System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files & Logs
+*.log
+node_modules/
+
+# IDE configurations
+.vscode/
+.idea/
+.project
+.settings/
+.buildpath
