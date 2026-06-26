@@ -358,8 +358,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Content Frame split view */
 .content-frame {
-  display: grid;
-  grid-template-columns: 1fr 400px;
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
   overflow: hidden;
 }

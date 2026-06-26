@@ -59,9 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
   LegacyModule.init(appendTelemetryLog);
 
   // Clear Terminal Button
-  document.getElementById('btn-clear-terminal').addEventListener('click', () => {
-    terminalLogs.innerHTML = `<span class="log-line text-muted">[System] Logs cleared. Waiting for events...</span>`;
-  });
+  const btnClearTerminal = document.getElementById('btn-clear-terminal');
+  if (btnClearTerminal) {
+    btnClearTerminal.addEventListener('click', () => {
+      terminalLogs.innerHTML = `<span class="log-line text-muted">[System] Logs cleared. Waiting for events...</span>`;
+    });
+  }
 
   // ==========================================
   // SPA View Navigation
