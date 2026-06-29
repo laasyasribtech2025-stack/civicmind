@@ -90,10 +90,11 @@ const City3D = {
     this.rimLight.position.set(-40, 20, -20);
     this.scene.add(this.rimLight);
 
-    // 6. Generate City Grid (Ground + Buildings + River + Trees)
+    // 6. Generate City Grid (Ground + Buildings + River + Trees + Plants)
     this.buildCityGround();
     this.generateProceduralBuildings();
     this.addTreesAndStreetlights();
+    this.addPlantsAndBushes();
     this.createTrafficFlow();
     this.createPedestrians();
     
@@ -286,14 +287,90 @@ const City3D = {
     }
   },
 
+  addPlantsAndBushes: function() {
+    const bushGeom = new THREE.SphereGeometry(0.55, 8, 8);
+    const bushMat = new THREE.MeshStandardMaterial({ color: 0x1d7a22, roughness: 0.9 });
+    
+    const stemGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.45, 6);
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
+    const petalGeom = new THREE.SphereGeometry(0.18, 6, 6);
+    const petalColors = [0xff3b30, 0xffcc00, 0xaf52de, 0xff9500];
+
+    for (let x = -135; x <= 135; x += 15) {
+      if (Math.abs(x) < 20) continue;
+
+      // River bank green bushes
+      const bushN = new THREE.Mesh(bushGeom, bushMat);
+      bushN.position.set(x + 4, 0.28, 13);
+      this.scene.add(bushN);
+
+      const bushS = new THREE.Mesh(bushGeom, bushMat);
+      bushS.position.set(x - 4, 0.28, -13);
+      this.scene.add(bushS);
+
+      // Colorful flowers along roads
+      const color = petalColors[Math.floor(Math.random() * petalColors.length)];
+      const petalMat = new THREE.MeshBasicMaterial({ color: color });
+
+      const flowerGroupE = new THREE.Group();
+      const stemE = new THREE.Mesh(stemGeom, stemMat);
+      stemE.position.y = 0.22;
+      const petalE = new THREE.Mesh(petalGeom, petalMat);
+      petalE.position.y = 0.45;
+      flowerGroupE.add(stemE, petalE);
+      flowerGroupE.position.set(7.5, 0, x);
+      this.scene.add(flowerGroupE);
+
+      const flowerGroupW = new THREE.Group();
+      const stemW = new THREE.Mesh(stemGeom, stemMat);
+      stemW.position.y = 0.22;
+      const petalW = new THREE.Mesh(petalGeom, petalMat);
+      petalW.position.y = 0.45;
+      flowerGroupW.add(stemW, petalW);
+      flowerGroupW.position.set(-7.5, 0, x);
+      this.scene.add(flowerGroupW);
+    }
+  },
+
   createPedestrians: function() {
-    const pedestrianCount = 25;
-    const geom = new THREE.SphereGeometry(0.35, 8, 8);
-    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+    const pedestrianCount = 20;
 
     for (let i = 0; i < pedestrianCount; i++) {
-      const mesh = new THREE.Mesh(geom, mat);
-      
+      const humanGroup = new THREE.Group();
+
+      // Torso (neon jacket)
+      const bodyGeom = new THREE.BoxGeometry(0.3, 0.45, 0.2);
+      const colors = [0x00f0ff, 0xbd00ff, 0xff007f, 0x00ff66];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: randomColor,
+        emissive: randomColor,
+        emissiveIntensity: 0.4,
+        roughness: 0.4
+      });
+      const body = new THREE.Mesh(bodyGeom, bodyMat);
+      body.position.y = 0.4;
+      humanGroup.add(body);
+
+      // Head
+      const headGeom = new THREE.SphereGeometry(0.14, 8, 8);
+      const headMat = new THREE.MeshBasicMaterial({ color: 0xffdfd0 });
+      const head = new THREE.Mesh(headGeom, headMat);
+      head.position.y = 0.72;
+      humanGroup.add(head);
+
+      // Left Leg
+      const legGeom = new THREE.BoxGeometry(0.08, 0.25, 0.08);
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x111625 });
+      const legL = new THREE.Mesh(legGeom, legMat);
+      legL.position.set(-0.07, 0.125, 0);
+      humanGroup.add(legL);
+
+      // Right Leg
+      const legR = new THREE.Mesh(legGeom, legMat);
+      legR.position.set(0.07, 0.125, 0);
+      humanGroup.add(legR);
+
       const pathType = Math.floor(Math.random() * 4);
       let x = 0, z = 0;
       let dir = new THREE.Vector3(0, 0, 0);
@@ -316,12 +393,20 @@ const City3D = {
         dir.set(0, 0, Math.random() > 0.5 ? 1 : -1);
       }
 
-      mesh.position.set(x, 0.35, z);
-      this.scene.add(mesh);
+      humanGroup.position.set(x, 0, z);
+      
+      // Face direction of walking
+      if (dir.x !== 0) {
+        humanGroup.rotation.y = dir.x > 0 ? Math.PI / 2 : -Math.PI / 2;
+      } else {
+        humanGroup.rotation.y = dir.z > 0 ? 0 : Math.PI;
+      }
+
+      this.scene.add(humanGroup);
 
       this.pedestrians.push({
         id: i + 1,
-        mesh: mesh,
+        mesh: humanGroup,
         direction: dir,
         speed: 0.15 + Math.random() * 0.15,
         lastDetectionTime: {}
@@ -406,6 +491,11 @@ const City3D = {
       // Boundaries wrap-around
       if (Math.abs(ped.mesh.position.x) > 150) ped.mesh.position.x = -ped.mesh.position.x;
       if (Math.abs(ped.mesh.position.z) > 150) ped.mesh.position.z = -ped.mesh.position.z;
+
+      // Leg swing animations (Left leg = child 2, Right leg = child 3)
+      const swing = Math.sin(Date.now() * 0.05 * ped.speed) * 0.5;
+      if (ped.mesh.children[2]) ped.mesh.children[2].rotation.x = swing;
+      if (ped.mesh.children[3]) ped.mesh.children[3].rotation.x = -swing;
 
       // Evaluate proximity to active issue markers
       Object.keys(this.markers).forEach(issueId => {
