@@ -97,6 +97,72 @@
     <!-- Main Workspace Area -->
     <main class="workspace">
       
+      <!-- Three.js Canvas Container (Global Backdrop) -->
+      <div id="city-twin-canvas-container" class="canvas-3d-wrapper">
+        <div class="canvas-loading">
+          <div class="futuristic-spinner"></div>
+          <span>Materializing Digital Twin...</span>
+        </div>
+      </div>
+
+      <!-- Floating 3D controls overlay -->
+      <div class="twin-overlay-controls" id="twin-hud-controls">
+        <button id="btn-camera-cinematic" class="btn btn-cyber-secondary">
+          <i data-lucide="video"></i> <span>Cinematic Mode</span>
+        </button>
+        <button id="btn-camera-free" class="btn btn-cyber-primary active">
+          <i data-lucide="mouse-pointer-click"></i> <span>Free Fly / Orbit</span>
+        </button>
+      </div>
+
+      <!-- AI Floating Insights Panel -->
+      <div class="ai-insights-panel" id="ai-insights-panel">
+        <div class="panel-header">
+          <h3><i data-lucide="cpu"></i> AI Telemetry Insights</h3>
+          <button class="btn-close-insights" id="btn-close-insights">&times;</button>
+        </div>
+        <div class="insights-body">
+          <div class="insight-group">
+            <span class="lbl">Asset Reference:</span>
+            <strong id="ins-asset-id">#CIV-9402</strong>
+          </div>
+          <div class="insight-group">
+            <span class="lbl">Reported Issue:</span>
+            <span class="insight-value" id="ins-type">Deep Road Pothole</span>
+          </div>
+          <div class="insight-group-row">
+            <div>
+              <span class="lbl">Severity Level:</span>
+              <span class="severity-pill critical" id="ins-severity">Critical</span>
+            </div>
+            <div>
+              <span class="lbl">Urgency Rating:</span>
+              <strong class="text-cyan" id="ins-urgency">9.4/10</strong>
+            </div>
+          </div>
+          <div class="insight-group">
+            <span class="lbl">Routing Department:</span>
+            <span class="insight-value" id="ins-dept">Public Works Department</span>
+          </div>
+          <div class="insight-group">
+            <span class="lbl">AI Impact Prediction:</span>
+            <p class="insight-desc" id="ins-prediction">High danger of vehicle chassis deformation, tire damage, and pedestrian balance loss. Heavy rains will expand structural damage.</p>
+          </div>
+          <div class="insight-group">
+            <span class="lbl">Community Validation Status:</span>
+            <div class="consensus-meter">
+              <div class="consensus-fill" style="width: 78%;" id="ins-consensus-fill"></div>
+            </div>
+            <div class="consensus-label">
+              <span id="ins-consensus-text">78% Consensus (14 Verified Votes)</span>
+            </div>
+          </div>
+          <div class="insights-actions">
+            <button class="btn btn-cyber-primary btn-full" id="btn-vote-insight"><i data-lucide="thumbs-up"></i> Verify Issue</button>
+          </div>
+        </div>
+      </div>
+      
       <!-- Top Header Bar -->
       <header class="top-bar">
         <div class="header-left">
@@ -232,78 +298,8 @@
             
           </div>
         </div>
-
-        <!-- View 2: 3D Twin (Full Screen Canvas) -->
-        <div id="view-twin" class="app-view">
-          <div class="twin-workspace-container">
-            <!-- Three.js Canvas Container -->
-            <div id="city-twin-canvas-container" class="canvas-3d-wrapper">
-              <div class="canvas-loading">
-                <div class="futuristic-spinner"></div>
-                <span>Materializing Digital Twin...</span>
-              </div>
-            </div>
-
-            <!-- Floating 3D controls overlay -->
-            <div class="twin-overlay-controls">
-              <button id="btn-camera-cinematic" class="btn btn-cyber-secondary">
-                <i data-lucide="video"></i> <span>Cinematic Mode</span>
-              </button>
-              <button id="btn-camera-free" class="btn btn-cyber-primary active">
-                <i data-lucide="mouse-pointer-click"></i> <span>Free Fly / Orbit</span>
-              </button>
-            </div>
-
-            <!-- AI Floating Insights Panel -->
-            <div class="ai-insights-panel" id="ai-insights-panel">
-              <div class="panel-header">
-                <h3><i data-lucide="cpu"></i> AI Telemetry Insights</h3>
-                <button class="btn-close-insights" id="btn-close-insights">&times;</button>
-              </div>
-              <div class="insights-body">
-                <div class="insight-group">
-                  <span class="lbl">Asset Reference:</span>
-                  <strong id="ins-asset-id">#CIV-9402</strong>
-                </div>
-                <div class="insight-group">
-                  <span class="lbl">Reported Issue:</span>
-                  <span class="insight-value" id="ins-type">Deep Road Pothole</span>
-                </div>
-                <div class="insight-group-row">
-                  <div>
-                    <span class="lbl">Severity Level:</span>
-                    <span class="severity-pill critical" id="ins-severity">Critical</span>
-                  </div>
-                  <div>
-                    <span class="lbl">Urgency Rating:</span>
-                    <strong class="text-cyan" id="ins-urgency">9.4/10</strong>
-                  </div>
-                </div>
-                <div class="insight-group">
-                  <span class="lbl">Routing Department:</span>
-                  <span class="insight-value" id="ins-dept">Public Works Department</span>
-                </div>
-                <div class="insight-group">
-                  <span class="lbl">AI Impact Prediction:</span>
-                  <p class="insight-desc" id="ins-prediction">High danger of vehicle chassis deformation, tire damage, and pedestrian balance loss. Heavy rains will expand structural damage.</p>
-                </div>
-                <div class="insight-group">
-                  <span class="lbl">Community Validation Status:</span>
-                  <div class="consensus-meter">
-                    <div class="consensus-fill" style="width: 78%;" id="ins-consensus-fill"></div>
-                  </div>
-                  <div class="consensus-label">
-                    <span id="ins-consensus-text">78% Consensus (14 Verified Votes)</span>
-                  </div>
-                </div>
-                <div class="insights-actions">
-                  <button class="btn btn-cyber-primary btn-full" id="btn-vote-insight"><i data-lucide="thumbs-up"></i> Verify Issue</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <!-- View 2: Transparent 3D Twin HUD clearance state -->
+        <div id="view-twin" class="app-view"></div>
         <!-- View 3: Smart Reporting -->
         <div id="view-report" class="app-view">
           <div class="glass-panel report-form-panel">
