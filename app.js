@@ -201,6 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Global window release reset to prevent permanent drift on click-and-drag-out
+  window.addEventListener('mouseup', () => {
+    dpadButtons.forEach(btnInfo => {
+      City3D.keys[btnInfo.key] = false;
+    });
+  });
+
   // ==========================================
   // Telemetry Console Logger
   // ==========================================

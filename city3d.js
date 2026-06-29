@@ -119,10 +119,10 @@ const City3D = {
 
     // Keyboard controls for first-person flying camera navigation
     window.addEventListener('keydown', (e) => {
-      this.keys[e.key.toLowerCase()] = true;
+      if (e.key) this.keys[e.key.toLowerCase()] = true;
     });
     window.addEventListener('keyup', (e) => {
-      this.keys[e.key.toLowerCase()] = false;
+      if (e.key) this.keys[e.key.toLowerCase()] = false;
     });
 
     // 9. Start Render Loop
@@ -728,6 +728,7 @@ const City3D = {
         positions[i * 3 + 2] = Math.sin(x * 0.08 + time) * 0.35;
       }
       this.riverMesh.geometry.attributes.position.needsUpdate = true;
+      this.riverMesh.geometry.computeVertexNormals();
     }
 
     // Animate expanding scanner radar mesh
