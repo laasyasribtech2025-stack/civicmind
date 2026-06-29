@@ -40,8 +40,8 @@ const City3D = {
     this.container.innerHTML = '';
     this.onMarkerClick = onMarkerClick;
 
-    const width = this.container.clientWidth;
-    const height = this.container.clientHeight || 500;
+    const width = this.container.clientWidth || (window.innerWidth - 280);
+    const height = this.container.clientHeight || window.innerHeight;
 
     // 1. Setup Scene & Atmospheric Fog
     this.scene = new THREE.Scene();
@@ -529,8 +529,8 @@ const City3D = {
 
   onWindowResize: function() {
     if (!this.container || !this.renderer) return;
-    const width = this.container.clientWidth;
-    const height = this.container.clientHeight || 500;
+    const width = this.container.clientWidth || (window.innerWidth - 280);
+    const height = this.container.clientHeight || window.innerHeight;
     
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
