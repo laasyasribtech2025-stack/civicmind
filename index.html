@@ -3,438 +3,602 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Digital Twin - Powered by Antigravity</title>
+  <title>CivicMind AI — 3D Smart City Control OS</title>
+  
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Stylesheets -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CDNs: Three.js, OrbitControls, Chart.js, Lucide Icons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- Background Grid & Nebulous Glows -->
+  <div class="cyber-grid"></div>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
   <!-- App Wrapper -->
   <div class="app-container">
     
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar Navigation (Apple Vision Pro/NASA glassmorphism) -->
     <aside class="sidebar">
       <div class="logo-area">
-        <span class="logo-icon">⭐</span>
+        <div class="logo-hexagon">
+          <div class="logo-inner"></div>
+        </div>
         <div class="logo-text">
-          <h2>TwinLink</h2>
-          <span>Family Digital Twin</span>
+          <h2>CIVICMIND <span class="accent-text">AI</span></h2>
+          <span>Smart City Twin OS</span>
         </div>
       </div>
 
       <nav class="nav-links">
         <button class="nav-btn active" data-view="dashboard">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <span>Dashboard</span>
+          <i data-lucide="layout-dashboard"></i>
+          <span>Command Center</span>
         </button>
-        <button class="nav-btn" data-view="chat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>AI Concierge</span>
+        <button class="nav-btn" data-view="twin">
+          <i data-lucide="map-pin"></i>
+          <span>3D Digital Twin</span>
         </button>
-        <button class="nav-btn" data-view="vault">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>Knowledge Vault</span>
+        <button class="nav-btn" data-view="report">
+          <i data-lucide="plus-square"></i>
+          <span>Smart Reporting</span>
         </button>
-        <button class="nav-btn" data-view="legacy">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-          <span>Legacy Vault</span>
+        <button class="nav-btn" data-view="verification">
+          <i data-lucide="shield-check"></i>
+          <span>Verification Hub</span>
+          <span class="badge badge-warn" id="nav-verify-count">4</span>
         </button>
-        <button class="nav-btn" data-view="privacy">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Privacy Center</span>
+        <button class="nav-btn" data-view="gamification">
+          <i data-lucide="award"></i>
+          <span>Gamification</span>
         </button>
       </nav>
 
+      <!-- Role Switcher & User Status -->
       <div class="user-status-card">
-        <div class="avatar" id="current-user-avatar">D</div>
-        <div class="info">
-          <h4 id="current-user-name">Dad (Arthur)</h4>
-          <span class="role-badge" id="current-user-role">Owner / Admin</span>
+        <div class="user-info-row">
+          <div class="avatar-ring">
+            <div class="avatar" id="current-user-avatar">AM</div>
+          </div>
+          <div class="info">
+            <h4 id="current-user-name">Alex Mercer</h4>
+            <span class="role-badge" id="current-user-role">Civic Hero</span>
+          </div>
+        </div>
+        <div class="rep-bar-container">
+          <div class="rep-bar-header">
+            <span>Reputation Score</span>
+            <span id="current-user-xp">980 XP</span>
+          </div>
+          <div class="rep-bar-fill" style="width: 85%;"></div>
+        </div>
+        
+        <div class="role-selector-wrapper">
+          <label for="role-selector"><i data-lucide="users"></i> Switch Session Role:</label>
+          <select id="role-selector" class="role-selector">
+            <option value="hero">Alex Mercer (Civic Hero)</option>
+            <option value="citizen">Sarah Jenkins (Citizen)</option>
+            <option value="officer">Officer Chen (Public Safety)</option>
+          </select>
         </div>
       </div>
     </aside>
 
     <!-- Main Workspace Area -->
     <main class="workspace">
-      <!-- Top header bar -->
+      
+      <!-- Top Header Bar -->
       <header class="top-bar">
         <div class="header-left">
-          <h1>Dashboard Overview</h1>
-          <p class="subtitle text-muted">Proactive intelligence keeping your family in sync.</p>
+          <h1 id="view-title">Command Center</h1>
+          <p class="subtitle text-muted" id="view-subtitle">Dynamic diagnostic twin controls and predictive analysis for Sector 4.</p>
         </div>
 
-        <!-- Global Search AI Bar -->
-        <div class="header-search">
-          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="global-search-ai" placeholder="Search AI (e.g., house insurance)..." autocomplete="off">
+        <!-- Telemetry Stats Panel -->
+        <div class="telemetry-stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">City Health Index</span>
+            <div class="stat-value-row">
+              <span class="stat-val text-green" id="stat-city-health">94%</span>
+              <span class="pulse-dot-green"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Active Threats</span>
+            <span class="stat-val text-cyan" id="stat-active-issues">12</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Community Votes</span>
+            <span class="stat-val text-purple" id="stat-votes-count">482</span>
+          </div>
         </div>
 
-        <div class="header-right">
-          <!-- Ambient Music Controller -->
-          <button id="btn-ambient-music" class="btn btn-ambient playing" title="Toggle background relaxing music">
-            <span class="music-icon" style="margin-right: 0.25rem;">🔊</span>
-            <span>Ambience: On</span>
-          </button>
-
-          <!-- Role Switcher -->
-          <div class="role-switcher-container">
-            <label for="role-selector">Active Role:</label>
-            <select id="role-selector" class="role-selector">
-              <option value="dad">Dad (Arthur)</option>
-              <option value="mom">Mom (Sarah)</option>
-              <option value="son">Son (Leo)</option>
-              <option value="daughter">Daughter (Chloe)</option>
-              <option value="grandma">Grandma (Elena)</option>
+        <!-- Atmosphere 3D Toggles -->
+        <div class="atmosphere-control-panel">
+          <div class="control-group">
+            <label><i data-lucide="sun"></i> Cycle Day/Night</label>
+            <input type="range" id="time-slider" min="0" max="24" step="0.1" value="12">
+          </div>
+          <div class="control-group">
+            <label><i data-lucide="cloud-rain"></i> Weather Twin</label>
+            <select id="weather-select" class="role-selector" style="width: 80px; padding: 2px; height: 18px; font-size: 0.65rem;">
+              <option value="clear">Clear</option>
+              <option value="rain">Rainy</option>
+              <option value="storm">Stormy</option>
             </select>
           </div>
-
-          <!-- Emergency Action Button -->
-          <button id="btn-emergency-trigger" class="btn btn-danger glow-red">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span>Grandma Collapsed</span>
-          </button>
+          <div class="toggle-buttons">
+            <button id="btn-toggle-fog" class="icon-toggle-btn active" title="Toggle Atmospheric Fog">
+              <i data-lucide="cloud-fog"></i>
+            </button>
+            <button id="btn-toggle-heatmap" class="icon-toggle-btn" title="Toggle Risk Heatmap Overlay">
+              <i data-lucide="flame"></i>
+            </button>
+            <button id="btn-toggle-traffic" class="icon-toggle-btn active" title="Toggle Traffic Energy flow">
+              <i data-lucide="navigation"></i>
+            </button>
+          </div>
         </div>
       </header>
 
-      <!-- Simulation Controller Bar -->
-      <section class="simulation-bar">
-        <span class="sim-label">Demo Workflows:</span>
-        <div class="sim-buttons">
-          <button class="btn btn-sim" id="sim-scenario-1" title="Find Insurance document and test access">
-            <span>1. Find Insurance</span>
-          </button>
-          <button class="btn btn-sim" id="sim-scenario-2" title="Simulate Grandma collapsing & launching parallel agents">
-            <span>2. Grandma Emergency</span>
-          </button>
-          <button class="btn btn-sim" id="sim-scenario-3" title="Query Grandpa's verified memory capsular archive">
-            <span>3. Grandpa's Story</span>
-          </button>
-          <button class="btn btn-sim" id="sim-scenario-4" title="Perform daily proactive background scans">
-            <span>4. Proactive Scan</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Dashboard Layout Content (Dynamic Views) -->
+      <!-- View Containers -->
       <div class="content-frame">
         
-        <!-- Interactive View Column -->
-        <div class="app-view-container">
-          
-          <!-- View 1: Dashboard -->
-          <div id="view-dashboard" class="app-view active">
-            <!-- Family Members Grid -->
-            <div class="dashboard-section">
-              <h3 class="section-title">Family Circle</h3>
-              <div class="family-grid">
-                <div class="family-card" id="fam-dad">
-                  <div class="fam-avatar dad">A</div>
-                  <h4>Arthur (Dad)</h4>
-                  <p>Investments, House Documents</p>
-                  <span class="status-pill online">Online</span>
+        <!-- View 1: Dashboard -->
+        <div id="view-dashboard" class="app-view active">
+          <div class="dashboard-grid">
+            
+            <div class="dash-row row-top">
+              <!-- Department Performance Panel -->
+              <div class="glass-panel performance-panel">
+                <div class="panel-header">
+                  <h3><i data-lucide="bar-chart-2"></i> Department Response Metrics</h3>
+                  <span class="panel-tag text-cyan">Real-time</span>
                 </div>
-                <div class="family-card" id="fam-mom">
-                  <div class="fam-avatar mom">S</div>
-                  <h4>Sarah (Mom)</h4>
-                  <p>Medicines, Recipes, Birthdays</p>
-                  <span class="status-pill online">Online</span>
+                <div class="chart-container">
+                  <canvas id="deptPerformanceChart"></canvas>
                 </div>
-                <div class="family-card" id="fam-son">
-                  <div class="fam-avatar son">L</div>
-                  <h4>Leo (Son)</h4>
-                  <p>Subscriptions, Tech Passwords</p>
-                  <span class="status-pill online">Online</span>
+              </div>
+
+              <!-- Predictive Failure Analytics -->
+              <div class="glass-panel prediction-panel">
+                <div class="panel-header">
+                  <h3><i data-lucide="trending-up"></i> AI Predictive Maintenance Alerts</h3>
+                  <span class="panel-tag text-purple">98.2% Accuracy</span>
                 </div>
-                <div class="family-card" id="fam-daughter">
-                  <div class="fam-avatar daughter">C</div>
-                  <h4>Chloe (Daughter)</h4>
-                  <p>Streaming Hub, Wi-Fi Admin</p>
-                  <span class="status-pill away">Away</span>
-                </div>
-                <div class="family-card" id="fam-grandma">
-                  <div class="fam-avatar grandma">E</div>
-                  <h4>Elena (Grandma)</h4>
-                  <p>Medical Profile, Legacy Stories</p>
-                  <span class="status-pill home">At Home</span>
+                <div class="predictive-list">
+                  <div class="predictive-item high-risk">
+                    <div class="risk-indicator"></div>
+                    <div class="predict-details">
+                      <h4>Water Main Burst Risk (Sector 4B)</h4>
+                      <p>Failure probability increases to 82% over the next 48 hours due to anomalous high pressure surge cycles.</p>
+                    </div>
+                    <div class="predict-meta">
+                      <span class="severity-pill critical">Critical</span>
+                      <button class="btn btn-tiny btn-prevent" data-sec="4B" data-type="water">Inspect</button>
+                    </div>
+                  </div>
+
+                  <div class="predictive-item med-risk">
+                    <div class="risk-indicator"></div>
+                    <div class="predict-details">
+                      <h4>Substation Alpha Transformer Overheating</h4>
+                      <p>Thermal threshold predicted to exceed 105°C during peak afternoon load. Cooling drone dispatch recommended.</p>
+                    </div>
+                    <div class="predict-meta">
+                      <span class="severity-pill warning">High</span>
+                      <button class="btn btn-tiny btn-prevent" data-sec="Alpha" data-type="power">Inspect</button>
+                    </div>
+                  </div>
+
+                  <div class="predictive-item low-risk">
+                    <div class="risk-indicator"></div>
+                    <div class="predict-details">
+                      <h4>Structural Concrete Spalling - Bridge Sector 12</h4>
+                      <p>Steady structural integrity degradation (0.4% weekly). Needs scheduled maintenance within 30 days.</p>
+                    </div>
+                    <div class="predict-meta">
+                      <span class="severity-pill low">Low</span>
+                      <button class="btn btn-tiny btn-prevent" data-sec="12" data-type="road">Inspect</button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Proactive Alerts Panel -->
-            <div class="dashboard-section">
-              <div class="section-header-flex">
-                <h3 class="section-title">Proactive AI Scanner</h3>
-                <span class="pulse-indicator">Active Monitoring</span>
+            <!-- Telemetry System Terminal Logger -->
+            <div class="glass-panel telemetry-terminal">
+              <div class="panel-header">
+                <h3><i data-lucide="terminal"></i> AI Cybernetic Telemetry Log</h3>
+                <button class="btn btn-secondary btn-small" id="btn-clear-telemetry">Reset Terminal</button>
               </div>
-              
-              <div id="proactive-alerts-feed" class="alerts-feed">
-                <!-- Alerts will be dynamically rendered here by proactive.js -->
+              <div class="terminal-body" id="telemetry-body-logs">
+                <span class="log-line system-log">[21:16:00] [System] Initialization complete. Connected to Smart City Digital Twin.</span>
+                <span class="log-line ai-log">[21:16:05] [AI Engine] Scanned Sector 3. Pothole severity graded MEDIUM. Dept Public Works notified.</span>
+                <span class="log-line success-log">[21:16:10] [Community] Issue #104 (Water Main Leak) verified by consensus. Status shifted to ASSIGNED.</span>
+                <span class="log-line error-log">[21:16:15] [AI Engine] WARNING: Preventative warning trigger - Substation Transformer Thermal Alert!</span>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        <!-- View 2: 3D Twin (Full Screen Canvas) -->
+        <div id="view-twin" class="app-view">
+          <div class="twin-workspace-container">
+            <!-- Three.js Canvas Container -->
+            <div id="city-twin-canvas-container" class="canvas-3d-wrapper">
+              <div class="canvas-loading">
+                <div class="futuristic-spinner"></div>
+                <span>Materializing Digital Twin...</span>
+              </div>
+            </div>
+
+            <!-- Floating 3D controls overlay -->
+            <div class="twin-overlay-controls">
+              <button id="btn-camera-cinematic" class="btn btn-cyber-secondary">
+                <i data-lucide="video"></i> <span>Cinematic Mode</span>
+              </button>
+              <button id="btn-camera-free" class="btn btn-cyber-primary active">
+                <i data-lucide="mouse-pointer-click"></i> <span>Free Fly / Orbit</span>
+              </button>
+            </div>
+
+            <!-- AI Floating Insights Panel -->
+            <div class="ai-insights-panel" id="ai-insights-panel">
+              <div class="panel-header">
+                <h3><i data-lucide="cpu"></i> AI Telemetry Insights</h3>
+                <button class="btn-close-insights" id="btn-close-insights">&times;</button>
+              </div>
+              <div class="insights-body">
+                <div class="insight-group">
+                  <span class="lbl">Asset Reference:</span>
+                  <strong id="ins-asset-id">#CIV-9402</strong>
+                </div>
+                <div class="insight-group">
+                  <span class="lbl">Reported Issue:</span>
+                  <span class="insight-value" id="ins-type">Deep Road Pothole</span>
+                </div>
+                <div class="insight-group-row">
+                  <div>
+                    <span class="lbl">Severity Level:</span>
+                    <span class="severity-pill critical" id="ins-severity">Critical</span>
+                  </div>
+                  <div>
+                    <span class="lbl">Urgency Rating:</span>
+                    <strong class="text-cyan" id="ins-urgency">9.4/10</strong>
+                  </div>
+                </div>
+                <div class="insight-group">
+                  <span class="lbl">Routing Department:</span>
+                  <span class="insight-value" id="ins-dept">Public Works Department</span>
+                </div>
+                <div class="insight-group">
+                  <span class="lbl">AI Impact Prediction:</span>
+                  <p class="insight-desc" id="ins-prediction">High danger of vehicle chassis deformation, tire damage, and pedestrian balance loss. Heavy rains will expand structural damage.</p>
+                </div>
+                <div class="insight-group">
+                  <span class="lbl">Community Validation Status:</span>
+                  <div class="consensus-meter">
+                    <div class="consensus-fill" style="width: 78%;" id="ins-consensus-fill"></div>
+                  </div>
+                  <div class="consensus-label">
+                    <span id="ins-consensus-text">78% Consensus (14 Verified Votes)</span>
+                  </div>
+                </div>
+                <div class="insights-actions">
+                  <button class="btn btn-cyber-primary btn-full" id="btn-vote-insight"><i data-lucide="thumbs-up"></i> Verify Issue</button>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- View 2: AI Concierge Chat -->
-          <div id="view-chat" class="app-view">
-            <div class="chat-wrapper theme-concierge" id="chat-wrapper-element">
-              <div class="chat-header">
-                <div class="chat-status">
-                  <div class="pulsing-dot-green"></div>
-                  <span id="chat-agent-title">Antigravity Concierge Active</span>
-                </div>
-                <div class="chat-clear-btn" id="btn-clear-chat">Reset Chat</div>
-              </div>
-
-              <!-- Chatbot Sub-Agent Selection Tabs -->
-              <div class="agent-chat-tabs" id="agent-chat-tabs-container">
-                <button class="agent-chat-tab active" data-agent="concierge">🛎️ Concierge</button>
-                <button class="agent-chat-tab" data-agent="knowledge">📖 Knowledge</button>
-                <button class="agent-chat-tab" data-agent="emergency">🚨 Emergency</button>
-                <button class="agent-chat-tab" data-agent="legacy">⏳ Legacy</button>
-                <button class="agent-chat-tab" data-agent="coordinator">🗓️ Coordinator</button>
-                <button class="agent-chat-tab" data-agent="privacy">🛡️ Privacy</button>
-                <button class="agent-chat-tab" data-agent="proactive">👁️ Proactive</button>
-              </div>
+        <!-- View 3: Smart Reporting -->
+        <div id="view-report" class="app-view">
+          <div class="glass-panel report-form-panel">
+            <div class="report-split-grid">
               
-              <div class="chat-messages" id="chat-messages-container">
-                <!-- Chat bubbles will go here -->
-                <div class="message system-msg">
-                  <strong>Antigravity Orchestrator:</strong> Welcome to the Family Concierge. Ask me anything. I can delegate your request to specialized agents (Knowledge, Legacy, Emergency) while ensuring strict role-based privacy filters.
+              <!-- Form inputs -->
+              <div class="report-inputs">
+                <h2>smart report telemetry</h2>
+                <p class="text-muted">AI automatically diagnoses issues, predicts community impact, and filters duplicates.</p>
+                
+                <div class="form-group">
+                  <label><i data-lucide="image"></i> Select Issue Target Image Preset</label>
+                  <div class="image-selector-grid">
+                    <div class="img-preset active" data-preset="pothole" data-img-name="pothole.jpg">
+                      <div class="img-preview pothole-preview">🚧</div>
+                      <span>Deep Pothole</span>
+                    </div>
+                    <div class="img-preset" data-preset="leak" data-img-name="leak.jpg">
+                      <div class="img-preview leak-preview">💧</div>
+                      <span>Water Leak</span>
+                    </div>
+                    <div class="img-preset" data-preset="streetlight" data-img-name="streetlight.jpg">
+                      <div class="img-preview streetlight-preview">💡</div>
+                      <span>Dead Light</span>
+                    </div>
+                    <div class="img-preset" data-preset="garbage" data-img-name="garbage.jpg">
+                      <div class="img-preview garbage-preview">🗑️</div>
+                      <span>Overflow Garbage</span>
+                    </div>
+                    <div class="img-preset" data-preset="wire" data-img-name="wire.jpg">
+                      <div class="img-preview wire-preview">⚡</div>
+                      <span>Fallen Wire</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Suggested Pills -->
-              <div class="chat-suggestion-pills">
-                <button class="pill-btn" data-query="Where are the house insurance papers?">Where are the house insurance papers?</button>
-                <button class="pill-btn" data-query="What was Grandpa's favorite story?">What was Grandpa's favorite story?</button>
-                <button class="pill-btn" data-query="List current sub-agent permissions.">View agent permissions</button>
-              </div>
+                <div class="form-group-row">
+                  <div class="form-group">
+                    <label><i data-lucide="navigation-2"></i> Grid Sector</label>
+                    <select id="report-sector">
+                      <option value="Sector 1">Sector 1 (Industrial)</option>
+                      <option value="Sector 2">Sector 2 (Commercial)</option>
+                      <option value="Sector 3">Sector 3 (Residential North)</option>
+                      <option value="Sector 4" selected>Sector 4 (City Center)</option>
+                      <option value="Sector 5">Sector 5 (Suburbs)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label><i data-lucide="map-pin"></i> Coordinates (3D X/Z Grid Offset)</label>
+                    <div class="coord-inputs">
+                      <input type="number" id="coord-x" placeholder="X Coord" value="12">
+                      <input type="number" id="coord-z" placeholder="Z Coord" value="-8">
+                    </div>
+                  </div>
+                </div>
 
-              <div class="chat-input-area">
-                <input type="text" id="chat-user-input" placeholder="Ask about folders, passwords, legacy memories, or reports..." autocomplete="off">
-                <button id="chat-send-btn">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <div class="form-group">
+                  <label><i data-lucide="file-text"></i> Additional Descriptive Context</label>
+                  <textarea id="report-desc" placeholder="Provide extra environmental tags (e.g. leaking outside high school, blocking driveway)..." rows="3"></textarea>
+                </div>
+
+                <button class="btn btn-cyber-primary btn-large btn-full" id="btn-submit-report">
+                  <i data-lucide="radio"></i> Broadcast Telemetry to AI
                 </button>
               </div>
+
+              <!-- AI Scanning Preview Panel -->
+              <div class="ai-scan-preview-panel">
+                <div class="scan-frame">
+                  <div class="scanner-laser"></div>
+                  <div class="scan-image-placeholder" id="scan-image-placeholder">
+                    <span class="scan-icon">📡</span>
+                    <span class="scan-txt">Awaiting Telemetry Feed</span>
+                  </div>
+                </div>
+
+                <div class="scan-results-card" id="scan-results-card">
+                  <div class="card-header">
+                    <h4><i data-lucide="activity"></i> AI Real-time Diagnostics</h4>
+                    <span class="glowing-badge">Auto Route</span>
+                  </div>
+                  <div class="card-content">
+                    <div class="diagnostic-row">
+                      <span>Detected Issue:</span>
+                      <strong id="diag-type" class="text-cyan">--</strong>
+                    </div>
+                    <div class="diagnostic-row">
+                      <span>Severity Assessment:</span>
+                      <span id="diag-severity" class="severity-pill">--</span>
+                    </div>
+                    <div class="diagnostic-row">
+                      <span>Urgency Priority:</span>
+                      <strong id="diag-urgency" class="text-purple">--</strong>
+                    </div>
+                    <div class="diagnostic-row">
+                      <span>Department Route:</span>
+                      <strong id="diag-dept">--</strong>
+                    </div>
+                    <div class="diagnostic-row flex-column">
+                      <span>AI Predicted Risk / Consequence:</span>
+                      <p id="diag-impact" class="text-muted">Please trigger a scan by selecting an image preset and clicking submit.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
+        </div>
 
-          <!-- View 3: Knowledge Vault -->
-          <div id="view-vault" class="app-view">
-            <div class="vault-container">
-              <div class="vault-header">
-                <h3>Family Knowledge Vault</h3>
-                <div class="vault-filters">
-                  <button class="filter-tag active" data-category="all">All</button>
-                  <button class="filter-tag" data-category="document">Documents</button>
-                  <button class="filter-tag" data-category="credentials">Passwords</button>
-                  <button class="filter-tag" data-category="health">Health</button>
-                  <button class="filter-tag" data-category="legacy">Legacy</button>
-                </div>
-              </div>
-
-              <div class="vault-list" id="vault-list-container">
-                <!-- Vault items dynamically loaded -->
-              </div>
-
-              <!-- Simulator for adding files -->
-              <div class="add-vault-item-panel">
-                <h4>Upload Knowledge Node</h4>
-                <div class="form-row">
-                  <input type="text" id="new-item-title" placeholder="Title (e.g. Netflix Password, Investment Portfolio)">
-                  <select id="new-item-category">
-                    <option value="document">Document</option>
-                    <option value="credentials">Credentials / Passwords</option>
-                    <option value="health">Health / Medical</option>
-                    <option value="legacy">Legacy / Recipes</option>
-                  </select>
-                </div>
-                <div class="form-row">
-                  <input type="text" id="new-item-location" placeholder="Physical Location (e.g. Cabinet 3, Drawer B, Digital)">
-                  <select id="new-item-owner">
-                    <option value="dad">Owner: Dad</option>
-                    <option value="mom">Owner: Mom</option>
-                    <option value="son">Owner: Son</option>
-                    <option value="daughter">Owner: Daughter</option>
-                    <option value="grandma">Owner: Grandma</option>
-                  </select>
-                </div>
-                <div class="form-row">
-                  <textarea id="new-item-value" placeholder="Secured Data Content (invisible to unauthorized members)..." rows="2"></textarea>
-                </div>
-                <button class="btn btn-primary" id="btn-save-vault-item">Save Node</button>
+        <!-- View 4: Verification Feed -->
+        <div id="view-verification" class="app-view">
+          <div class="verification-layout">
+            <div class="verification-controls">
+              <h2>Community consensus list</h2>
+              <p class="text-muted">Validate pending reports. Real-time consensus filters fake alerts.</p>
+              <div class="filter-buttons">
+                <button class="btn btn-secondary active" id="btn-filter-all">All Pending</button>
+                <button class="btn btn-secondary" id="btn-filter-critical">Critical Only</button>
+                <button class="btn btn-secondary" id="btn-filter-duplicates">Duplicate Warned</button>
               </div>
             </div>
-          </div>
 
-          <!-- View 4: Legacy Archive -->
-          <div id="view-legacy" class="app-view">
-            <div class="legacy-container">
-              <div class="legacy-header">
-                <h3>Memorys Archive</h3>
-                <p>Preserving verified stories, memories, photos, videos, and voice logs. Enforcing strict role-based privacy filters.</p>
-              </div>
-
-              <div class="legacy-timeline" id="legacy-timeline-container">
-                <!-- Timeline items will be rendered here -->
-              </div>
-
-              <!-- Upload form for adding verified memory -->
-              <div class="add-vault-item-panel" style="margin-top: 2.5rem;">
-                <h4>Record New Verified Memory</h4>
-                <div class="form-row">
-                  <input type="text" id="new-legacy-title" placeholder="Memory Title (e.g., Grandma's Childhood, Baking Lemon Tart)">
-                  <select id="new-legacy-member">
-                    <option value="Grandpa Robert">Subject: Grandpa Robert</option>
-                    <option value="Grandma Elena">Subject: Grandma Elena</option>
-                    <option value="Dad Arthur">Subject: Dad Arthur</option>
-                    <option value="Mom Sarah">Subject: Mom Sarah</option>
-                  </select>
-                </div>
-                <div class="form-row">
-                  <input type="text" id="new-legacy-file" placeholder="Voice Clip File Name (e.g. grandma_meringue_recipe.wav)">
-                  <select id="new-legacy-privacy">
-                    <option value="Family">Privacy: Shared with Family</option>
-                    <option value="Restricted">Privacy: Restricted (Parents only)</option>
-                    <option value="Private">Privacy: Private (Self only)</option>
-                  </select>
-                </div>
-                <div class="form-row">
-                  <input type="text" id="new-legacy-photo" placeholder="Mock Photo Image URL (e.g., photo_tart.jpg)">
-                  <input type="text" id="new-legacy-video" placeholder="Mock Video File Name (e.g., video_birthday.mp4)">
-                </div>
-                <div class="form-row">
-                  <textarea id="new-legacy-story" placeholder="Type the transcription or verified text story here..." rows="3"></textarea>
-                </div>
-                <button class="btn btn-primary" id="btn-save-legacy-item">Verify & Save Memory</button>
-              </div>
+            <div class="verification-feed-grid" id="verification-feed-grid">
+              <!-- Dynamically populated verification items -->
             </div>
           </div>
+        </div>
 
-          <!-- View 5: Privacy Matrix -->
-          <div id="view-privacy" class="app-view">
-            <div class="privacy-container">
-              <h3>Privacy & Control Center</h3>
-              <p>Granular access control simulation. Each family member owns their knowledge. Below is the active policy map enforced by the Privacy Agent.</p>
-              
-              <div class="privacy-table-wrapper">
-                <table class="privacy-matrix-table">
-                  <thead>
-                    <tr>
-                      <th>Folder Category</th>
-                      <th>Dad (Arthur)</th>
-                      <th>Mom (Sarah)</th>
-                      <th>Son (Leo)</th>
-                      <th>Daughter (Chloe)</th>
-                      <th>Grandma (Elena)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="privacy-matrix-body">
-                    <!-- Matrix loaded dynamically -->
-                  </tbody>
-                </table>
+        <!-- View 5: Gamification & Rewards -->
+        <div id="view-gamification" class="app-view">
+          <div class="gamification-grid">
+            
+            <!-- User Status & Reputation Level -->
+            <div class="glass-panel level-status-panel">
+              <div class="circular-progress-wrap">
+                <svg class="circular-progress" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" class="circle-bg"></circle>
+                  <circle cx="50" cy="50" r="40" class="circle-fill" style="stroke-dashoffset: 62.8;"></circle>
+                </svg>
+                <div class="level-overlay-text">
+                  <span class="level-num">Lvl 4</span>
+                  <span class="level-lbl">Civic Hero</span>
+                </div>
               </div>
-
-              <div class="privacy-notes">
-                <div class="note-card info-note">
-                  <h5>🛡️ Enforced by Privacy Agent</h5>
-                  <p>When the Concierge delegates queries to the Knowledge Agent, the Privacy Agent intercepts the metadata payload. Access is immediately terminated if the active role does not have "Read" permission, returning an audit logged error.</p>
+              <div class="stats-recap">
+                <div class="stat-recap-item">
+                  <span class="recap-num">32</span>
+                  <span class="recap-lbl">Reports Filed</span>
+                </div>
+                <div class="stat-recap-item">
+                  <span class="recap-num">145</span>
+                  <span class="recap-lbl">Votes Cast</span>
+                </div>
+                <div class="stat-recap-item">
+                  <span class="recap-num">98%</span>
+                  <span class="recap-lbl">Trust Score</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Special Modal Frame: EMERGENCY DASHBOARD (Shown during Emergency Mode) -->
-          <div id="emergency-overlay" class="emergency-overlay">
-            <div class="emergency-dashboard-card">
-              <div class="emergency-header">
-                <div class="pulse-ring-crimson"></div>
-                <div class="emergency-title">
-                  <h2>CRITICAL ALERT: Medical Emergency</h2>
-                  <span>Agent System Elevated to EMERGENCY-LEVEL Access Controls</span>
-                </div>
-                <button class="btn btn-close-emergency" id="btn-resolve-emergency">Resolve Emergency</button>
-              </div>
-
-              <div class="emergency-grid">
-                <!-- Dynamic Data populated by Emergency Agent -->
-                <div class="em-panel profile-panel">
-                  <h3>Subject Profile</h3>
-                  <div class="em-profile-row">
-                    <span class="lbl">Name:</span> <strong id="em-subject-name">Elena (Grandma)</strong>
+            <!-- Leaderboard panel -->
+            <div class="glass-panel leaderboard-panel">
+              <h3><i data-lucide="trophy"></i> Sector 4 Contribution Leaderboard</h3>
+              <div class="leaderboard-list">
+                <div class="leaderboard-item rank-1">
+                  <span class="rank">#1</span>
+                  <div class="lead-avatar">🏆</div>
+                  <div class="lead-info">
+                    <h4>Alex Mercer</h4>
+                    <span>980 XP • 14 Verified Reports</span>
                   </div>
-                  <div class="em-profile-row">
-                    <span class="lbl">Blood Type:</span> <strong id="em-subject-blood">O Positive (O+)</strong>
-                  </div>
-                  <div class="em-profile-row">
-                    <span class="lbl">Critical Allergies:</span> <span class="danger-badge" id="em-subject-allergies">Penicillin, Peanuts</span>
-                  </div>
+                  <span class="badge badge-hero">Civic Hero</span>
                 </div>
 
-                <div class="em-panel meds-panel">
-                  <h3>Current Daily Medications</h3>
-                  <ul class="em-meds-list" id="em-subject-meds">
-                    <!-- Dynamic list of meds -->
-                  </ul>
+                <div class="leaderboard-item">
+                  <span class="rank">#2</span>
+                  <div class="lead-avatar">👤</div>
+                  <div class="lead-info">
+                    <h4>Elena Rostova</h4>
+                    <span>810 XP • 9 Verified Reports</span>
+                  </div>
+                  <span class="badge badge-trusted">Trusted Reporter</span>
                 </div>
 
-                <div class="em-panel facility-panel">
-                  <h3>Contacts & Logistics</h3>
-                  <div class="logistics-card">
-                    <h5>Emergency Contacts</h5>
-                    <p>Dad (Arthur): <strong>+1 (555) 932-1200</strong></p>
-                    <p>Primary Doctor: <strong id="em-subject-doc">Dr. Henderson (+1-555-894-3232)</strong></p>
+                <div class="leaderboard-item">
+                  <span class="rank">#3</span>
+                  <div class="lead-avatar">👤</div>
+                  <div class="lead-info">
+                    <h4>Marcus K.</h4>
+                    <span>680 XP • 7 Verified Reports</span>
                   </div>
-                  <div class="logistics-card mt-2">
-                    <h5>Preferred Medical Center</h5>
-                    <p id="em-subject-hosp">St. Jude Community Hospital Emergency Ward (2.4 miles away)</p>
-                  </div>
+                  <span class="badge badge-trusted">Trusted Reporter</span>
                 </div>
 
-                <div class="em-panel insurance-panel">
-                  <h3>Insurance Coverage</h3>
-                  <div class="logistics-card">
-                    <h5>Primary Insurance Provider</h5>
-                    <p id="em-subject-ins-provider">BlueCross Family Shield Gold</p>
+                <div class="leaderboard-item">
+                  <span class="rank">#4</span>
+                  <div class="lead-avatar">👤</div>
+                  <div class="lead-info">
+                    <h4>Sarah Jenkins</h4>
+                    <span>420 XP • 4 Verified Reports</span>
                   </div>
-                  <div class="logistics-card mt-2">
-                    <h5>Policy Coordinates</h5>
-                    <p>Policy Num: <strong id="em-subject-ins-policy">BC-9481-2294A</strong></p>
-                    <p>Physical Location: <strong id="em-subject-ins-loc">Cabinet 1, Top Drawer (Yellow Folder)</strong></p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Coordinator Actions -->
-              <div class="emergency-coordinator-actions">
-                <h3>Antigravity Coordinator Tasks Active</h3>
-                <div class="coordinator-task-pills" id="em-coordinator-tasks">
-                  <!-- Task pills will show up -->
+                  <span class="badge badge-citizen">Citizen</span>
                 </div>
               </div>
             </div>
-          </div>
 
+            <!-- Badges Showroom -->
+            <div class="glass-panel badges-panel">
+              <h3><i data-lucide="shield"></i> Earned Badges</h3>
+              <div class="badges-grid">
+                <div class="badge-card unlocked">
+                  <span class="badge-icon">👁️</span>
+                  <h4>Guardian Watcher</h4>
+                  <p>Reported 10+ validated infrastructure issues.</p>
+                </div>
+                <div class="badge-card unlocked">
+                  <span class="badge-icon">⚡</span>
+                  <h4>Hazard Shield</h4>
+                  <p>Identified and reported 3+ critical power or wire issues.</p>
+                </div>
+                <div class="badge-card unlocked">
+                  <span class="badge-icon">💧</span>
+                  <h4>Aqua Conservator</h4>
+                  <p>Reported leaks saved over 50,000 Gallons of water.</p>
+                </div>
+                <div class="badge-card locked">
+                  <span class="badge-icon">👑</span>
+                  <h4>City Overseer</h4>
+                  <p>Reach rank #1 on the leaderboard for 7 days.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>
 
     </main>
 
+    <!-- Right-collapsible Jarvis Assistant (Tesla UI style) -->
+    <aside class="chat-assistant-drawer">
+      <div class="drawer-header">
+        <div class="ai-avatar">
+          <div class="pulse-ring"></div>
+          <div class="ai-avatar-inner">J</div>
+        </div>
+        <div class="drawer-header-text">
+          <h3>JARVIS CIVIC AI</h3>
+          <div class="chat-status-glow">
+            <span class="glow-dot"></span>
+            <span>Online</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages container -->
+      <div class="chat-messages-container" id="jarvis-chat-messages">
+        <div class="message ai">
+          <div class="msg-bubble">
+            Greeting Agent. I am JARVIS, the Civic Intelligence Coordinator. How can I assist you with the Sector 4 Digital Twin today?
+          </div>
+          <span class="msg-time">21:16</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="chat-suggestions">
+        <button class="chat-pill" data-cmd="locate water leaks">💧 Locate water leaks</button>
+        <button class="chat-pill" data-cmd="show critical issues">🚨 Focus Criticals</button>
+        <button class="chat-pill" data-cmd="inspect sector 4">🔎 Health of Sector 4</button>
+      </div>
+
+      <!-- Chat input field -->
+      <div class="chat-input-row">
+        <input type="text" id="jarvis-input" placeholder="Initiate Jarvis command sequence..." autocomplete="off">
+        <button id="btn-jarvis-send" class="btn-cyber-primary">
+          <i data-lucide="send"></i>
+        </button>
+      </div>
+    </aside>
+
   </div>
 
-  <!-- Ambient looping background music -->
-  <audio id="bg-relaxing-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
-
   <!-- Javascript Modules -->
-  <script src="mcpSimulator.js"></script>
-  <script src="security.js"></script>
-  <script src="agentSystem.js"></script>
-  <script src="proactive.js"></script>
-  <script src="legacy.js"></script>
+  <script src="aiEngine.js"></script>
+  <script src="city3d.js"></script>
+  <script src="chatAssistant.js"></script>
   <script src="app.js"></script>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
 </body>
 </html>

@@ -1,86 +1,135 @@
 /**
- * Family Concierge AI - Master Coordination & Dynamic UI Controller
+ * CivicMind AI - Main Application & State Controller
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   
   // ==========================================
-  // Telemetry Console Logging System
+  // Global Database & State
   // ==========================================
-  const terminalLogs = document.getElementById('terminal-body-logs');
-
-  function appendTelemetryLog(logObj) {
-    if (!terminalLogs) return;
-    
-    const logLine = document.createElement('span');
-    logLine.className = 'log-line';
-    
-    if (logObj.type === 'agent-log') {
-      logLine.className += ' agent-log';
-      logLine.innerText = `[${logObj.timestamp}] [${logObj.agent}] ${logObj.message}`;
-      if (logObj.data) {
-        const detail = document.createElement('div');
-        detail.className = 'log-line text-muted';
-        detail.style.paddingLeft = '1.5rem';
-        detail.innerText = `↳ Payload: ${logObj.data}`;
-        logLine.appendChild(detail);
-      }
-    } 
-    else if (logObj.type === 'mcp-log') {
-      logLine.className += ' mcp-log';
-      logLine.innerText = `[${logObj.timestamp}] [${logObj.server}] ${logObj.message}`;
-      
-      const detail = document.createElement('div');
-      detail.className = 'log-line text-muted';
-      detail.style.paddingLeft = '1.5rem';
-      detail.innerText = `↳ Call: ${logObj.params} | Return: ${logObj.response}`;
-      logLine.appendChild(detail);
-    } 
-    else if (logObj.type === 'success-log') {
-      logLine.className += ' success-log';
-      logLine.innerText = `[${logObj.timestamp}] [System] Success: ${logObj.message}`;
-    } 
-    else if (logObj.type === 'error-log') {
-      logLine.className += ' error-log';
-      logLine.innerText = `[${logObj.timestamp}] [Privacy] ALERT: ${logObj.message}`;
-    } 
-    else {
-      logLine.innerText = `[${logObj.timestamp}] [System] ${logObj.message}`;
+  const issueRegistry = [
+    {
+      id: "CIV-8419",
+      category: "leak",
+      title: "Broken Hydrant Water Leak",
+      desc: "Water is spraying onto the pedestrian lane, causing flooding and hazardous footing.",
+      sector: "Sector 4",
+      x: 10,
+      z: -15,
+      severity: "Critical",
+      urgency: 9.2,
+      department: "Water & Sanitation Dept",
+      impact: "Severe sub-surface soil erosion, potential sinkhole formation, and drinkable water waste.",
+      status: "Reported",
+      votes: 1,
+      consensus: 50, // % consensus
+      reportedBy: "Sarah Jenkins",
+      timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+    },
+    {
+      id: "CIV-9218",
+      category: "pothole",
+      title: "Deep Pothole Center Lane",
+      desc: "Large pothole in the middle of the road, forcing cars to swerve into opposing lanes.",
+      sector: "Sector 3",
+      x: -20,
+      z: 25,
+      severity: "High",
+      urgency: 7.8,
+      department: "Public Works Department",
+      impact: "High danger of vehicle chassis deformation, tire blowouts, and swerving collisions.",
+      status: "Verified",
+      votes: 8,
+      consensus: 85,
+      reportedBy: "Marcus K.",
+      timestamp: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
+    },
+    {
+      id: "CIV-7301",
+      category: "streetlight",
+      title: "Faulty Streetlight Sector 4",
+      desc: "Double streetlight out on commercial boulevard. Pitch black section near shopping precinct.",
+      sector: "Sector 4",
+      x: 25,
+      z: 10,
+      severity: "Low",
+      urgency: 3.5,
+      department: "Department of Energy & Lighting",
+      impact: "Reduced safety perception, increased crime risk, and vehicle-pedestrian visibility impairment.",
+      status: "In Progress",
+      votes: 14,
+      consensus: 100,
+      reportedBy: "Alex Mercer",
+      timestamp: new Date(Date.now() - 14400000).toISOString() // 4 hours ago
+    },
+    {
+      id: "CIV-5192",
+      category: "garbage",
+      title: "Hazardous Chemical Disposal",
+      desc: "Drums with warning labels abandoned on sidewalk adjacent to public park.",
+      sector: "Sector 5",
+      x: -35,
+      z: -25,
+      severity: "Critical",
+      urgency: 9.8,
+      department: "Public Safety & Power Grid",
+      impact: "Severe toxicity hazard, direct soil pollution, and public contact safety danger.",
+      status: "Assigned",
+      votes: 21,
+      consensus: 95,
+      reportedBy: "Officer Chen",
+      timestamp: new Date(Date.now() - 86400000).toISOString() // 1 day ago
     }
+  ];
 
-    terminalLogs.appendChild(logLine);
-    terminalLogs.scrollTop = terminalLogs.scrollHeight;
-  }
+  // User Profile Configurations
+  const userProfiles = {
+    hero: {
+      name: "Alex Mercer",
+      avatar: "AM",
+      role: "Civic Hero",
+      xp: 980,
+      level: 4,
+      reports: 32,
+      votes: 145,
+      trust: 98
+    },
+    citizen: {
+      name: "Sarah Jenkins",
+      avatar: "SJ",
+      role: "Citizen",
+      xp: 420,
+      level: 2,
+      reports: 4,
+      votes: 28,
+      trust: 85
+    },
+    officer: {
+      name: "Officer Chen",
+      avatar: "OC",
+      role: "Public Safety Officer",
+      xp: 1250,
+      level: 5,
+      reports: 55,
+      votes: 310,
+      trust: 100
+    }
+  };
 
-  // Bind log outputs from modules
-  McpSimulator.setLogCallback(appendTelemetryLog);
-  AgentSystem.setLogCallback(appendTelemetryLog);
-  ProactiveModule.init(appendTelemetryLog);
-  LegacyModule.init(appendTelemetryLog);
-
-  // Clear Terminal Button
-  const btnClearTerminal = document.getElementById('btn-clear-terminal');
-  if (btnClearTerminal) {
-    btnClearTerminal.addEventListener('click', () => {
-      terminalLogs.innerHTML = `<span class="log-line text-muted">[System] Logs cleared. Waiting for events...</span>`;
-    });
-  }
+  let currentUserKey = 'hero';
+  let chartInstance = null;
 
   // ==========================================
-  // SPA View Navigation
+  // Navigation & SPA Logic
   // ==========================================
   const navButtons = document.querySelectorAll('.nav-btn');
   const appViews = document.querySelectorAll('.app-view');
-  const headerTitle = document.querySelector('.top-bar h1');
-  const headerSubtitle = document.querySelector('.top-bar .subtitle');
+  const viewTitle = document.getElementById('view-title');
+  const viewSubtitle = document.getElementById('view-subtitle');
 
   function switchView(viewName) {
-    appViews.forEach(view => {
-      view.classList.remove('active');
-    });
-    navButtons.forEach(btn => {
-      btn.classList.remove('active');
-    });
+    appViews.forEach(view => view.classList.remove('active'));
+    navButtons.forEach(btn => btn.classList.remove('active'));
 
     const targetView = document.getElementById(`view-${viewName}`);
     const targetBtn = document.querySelector(`[data-view="${viewName}"]`);
@@ -90,30 +139,34 @@ document.addEventListener('DOMContentLoaded', () => {
       targetBtn.classList.add('active');
     }
 
-    // Update Header Text depending on view
-    switch (viewName) {
+    // Refresh telemetry logs and header
+    switch(viewName) {
       case 'dashboard':
-        headerTitle.innerText = "Family Twin Dashboard";
-        headerSubtitle.innerText = "Proactive intelligence keeping your family in sync.";
+        viewTitle.innerText = "Command Center";
+        viewSubtitle.innerText = "Dynamic diagnostic twin controls and predictive analysis for Sector 4.";
+        setTimeout(initPerformanceChart, 100);
         break;
-      case 'chat':
-        headerTitle.innerText = "Antigravity Concierge Chat";
-        headerSubtitle.innerText = "Speak with your digital twin network. Strict role filters apply.";
+      case 'twin':
+        viewTitle.innerText = "3D Digital Twin";
+        viewSubtitle.innerText = "Procedurally mapped smart twin showing hazards, traffic grid flows, and health markers.";
+        // Trigger resize to fix canvas size issues
+        if (window.City3D && City3D.onWindowResize) {
+          setTimeout(() => City3D.onWindowResize(), 100);
+        }
         break;
-      case 'vault':
-        headerTitle.innerText = "Knowledge Vault";
-        headerSubtitle.innerText = "Structured document storage with owner permissions.";
-        renderVaultList();
+      case 'report':
+        viewTitle.innerText = "Smart Reporting";
+        viewSubtitle.innerText = "Auto-classify issue parameters and inspect for duplicate entries near coordinates.";
         break;
-      case 'legacy':
-        headerTitle.innerText = "Memorys Archive";
-        headerSubtitle.innerText = "Verified historical records, photos, and videos. Enforced by Privacy Agent.";
-        LegacyModule.renderTimeline();
+      case 'verification':
+        viewTitle.innerText = "Verification Hub";
+        viewSubtitle.innerText = "Upvote reports to confirm legitimacy or report duplicates to AI coordinator.";
+        renderVerificationFeed();
         break;
-      case 'privacy':
-        headerTitle.innerText = "Privacy Matrix Configuration";
-        headerSubtitle.innerText = "Review sub-agent access authorization lists.";
-        renderPrivacyMatrix();
+      case 'gamification':
+        viewTitle.innerText = "Civic Ranks & Rewards";
+        viewSubtitle.innerText = "Review contributions, unlock achievements, and climb local leaderboards.";
+        updateGamificationView();
         break;
     }
   }
@@ -125,882 +178,640 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================================
+  // Telemetry Console Logger
+  // ==========================================
+  const terminalLogs = document.getElementById('telemetry-body-logs');
+
+  function appendTelemetryLog(message, type = 'system-log') {
+    if (!terminalLogs) return;
+    const logLine = document.createElement('span');
+    logLine.className = `log-line ${type}`;
+    
+    const timeStr = new Date().toLocaleTimeString([], { hour12: false });
+    logLine.innerText = `[${timeStr}] ${message}`;
+    
+    terminalLogs.appendChild(logLine);
+    terminalLogs.scrollTop = terminalLogs.scrollHeight;
+  }
+
+  // Set global logger callback for sub-modules
+  window.appLogCallback = appendTelemetryLog;
+
+  const btnClearTelemetry = document.getElementById('btn-clear-telemetry');
+  if (btnClearTelemetry) {
+    btnClearTelemetry.addEventListener('click', () => {
+      terminalLogs.innerHTML = `<span class="log-line system-log">[System] Logs cleared. Listening to telemetry feeds...</span>`;
+    });
+  }
+
+  // ==========================================
+  // Department Performance Chart (Chart.js)
+  // ==========================================
+  function initPerformanceChart() {
+    const ctx = document.getElementById('deptPerformanceChart');
+    if (!ctx) return;
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    const data = {
+      labels: ['Water & San.', 'Public Works', 'Energy & Light', 'Waste & Env.', 'Public Safety'],
+      datasets: [{
+        label: 'Average Response Time (Hours)',
+        data: [1.8, 2.4, 4.2, 3.1, 0.9],
+        backgroundColor: [
+          'rgba(0, 240, 255, 0.15)',
+          'rgba(189, 0, 255, 0.15)',
+          'rgba(255, 184, 0, 0.15)',
+          'rgba(0, 255, 102, 0.15)',
+          'rgba(255, 0, 85, 0.15)'
+        ],
+        borderColor: [
+          '#00f0ff',
+          '#bd00ff',
+          '#ffb800',
+          '#00ff66',
+          '#ff0055'
+        ],
+        borderWidth: 1.5,
+        hoverBackgroundColor: [
+          'rgba(0, 240, 255, 0.3)',
+          'rgba(189, 0, 255, 0.3)',
+          'rgba(255, 184, 0, 0.3)',
+          'rgba(0, 255, 102, 0.3)',
+          'rgba(255, 0, 85, 0.3)'
+        ]
+      }]
+    };
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#8b9bb4', font: { family: 'Inter' } }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#8b9bb4', font: { family: 'Inter' } }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  // ==========================================
   // Role Switcher Logic
   // ==========================================
   const roleSelector = document.getElementById('role-selector');
-  const currentAvatar = document.getElementById('current-user-avatar');
-  const currentName = document.getElementById('current-user-name');
-  const currentRole = document.getElementById('current-user-role');
+  const avatarEl = document.getElementById('current-user-avatar');
+  const nameEl = document.getElementById('current-user-name');
+  const roleEl = document.getElementById('current-user-role');
+  const xpEl = document.getElementById('current-user-xp');
 
   function handleRoleChange(userKey) {
-    const userObj = SecurityModule.setActiveUser(userKey);
-    if (!userObj) return;
+    currentUserKey = userKey;
+    const profile = userProfiles[userKey];
+    if (!profile) return;
 
-    // Update sidebar card
-    currentAvatar.innerText = userObj.avatar;
-    currentName.innerText = userObj.name;
-    currentRole.innerText = userObj.role;
-
-    // Log the change
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: `Active session role switched to: ${userObj.name} (${userObj.role})`
-    });
-
-    // Update highlights on Family Cards
-    document.querySelectorAll('.family-card').forEach(card => {
-      card.classList.remove('active-user-highlight');
-    });
+    avatarEl.innerText = profile.avatar;
+    nameEl.innerText = profile.name;
+    roleEl.innerText = profile.role;
+    xpEl.innerText = `${profile.xp} XP`;
     
-    const cardMap = {
-      dad: 'fam-dad',
-      mom: 'fam-mom',
-      son: 'fam-son',
-      daughter: 'fam-daughter',
-      grandma: 'fam-grandma'
-    };
-    
-    const activeCard = document.getElementById(cardMap[userKey]);
-    if (activeCard) {
-      activeCard.classList.add('active-user-highlight');
+    // Update rep bar fill width
+    const repFill = document.querySelector('.rep-bar-fill');
+    if (repFill) {
+      const percentage = (profile.xp % 1000) / 10;
+      repFill.style.width = `${percentage}%`;
     }
 
-    // Refresh views to adjust permissions display
-    const activeViewEl = document.querySelector('.app-view.active');
-    if (activeViewEl) {
-      const activeViewId = activeViewEl.id.replace('view-', '');
-      if (activeViewId === 'vault') {
-        renderVaultList();
-      }
-    }
+    appendTelemetryLog(`Session key switched. Active profile: ${profile.name} (${profile.role})`, 'system-log');
+    
+    // Refresh verification feed and gamification lists
+    renderVerificationFeed();
+    updateGamificationView();
   }
 
   roleSelector.addEventListener('change', (e) => {
     handleRoleChange(e.target.value);
   });
 
-  // Family Cards Click Handler to Switch Roles directly by clicking on cards
-  const familyCards = [
-    { id: 'fam-dad', key: 'dad' },
-    { id: 'fam-mom', key: 'mom' },
-    { id: 'fam-son', key: 'son' },
-    { id: 'fam-daughter', key: 'daughter' },
-    { id: 'fam-grandma', key: 'grandma' }
-  ];
-
-  familyCards.forEach(card => {
-    const cardEl = document.getElementById(card.id);
-    if (cardEl) {
-      cardEl.addEventListener('click', () => {
-        roleSelector.value = card.key;
-        handleRoleChange(card.key);
-      });
-    }
-  });
-
-  // Pre-highlight Dad initially
-  document.getElementById('fam-dad').classList.add('active-user-highlight');
-
   // ==========================================
-  // Knowledge Vault Operations
+  // Smart Reporting (Submit telemetries)
   // ==========================================
-  let activeVaultCategory = 'all';
-  const filterTags = document.querySelectorAll('.filter-tag');
+  const imgPresets = document.querySelectorAll('.img-preset');
+  const btnSubmitReport = document.getElementById('btn-submit-report');
+  const scanFrame = document.querySelector('.scan-frame');
+  const scanResults = document.getElementById('scan-results-card');
 
-  filterTags.forEach(tag => {
-    tag.addEventListener('click', () => {
-      filterTags.forEach(t => t.classList.remove('active'));
-      tag.classList.add('active');
-      activeVaultCategory = tag.getAttribute('data-category');
-      renderVaultList();
+  let activePresetKey = 'pothole';
+
+  imgPresets.forEach(preset => {
+    preset.addEventListener('click', (e) => {
+      imgPresets.forEach(p => p.classList.remove('active'));
+      preset.classList.add('active');
+      activePresetKey = preset.getAttribute('data-preset');
     });
   });
 
-  function renderVaultList() {
-    const listContainer = document.getElementById('vault-list-container');
-    if (!listContainer) return;
+  btnSubmitReport.addEventListener('click', async () => {
+    const xCoord = parseFloat(document.getElementById('coord-x').value) || 0;
+    const zCoord = parseFloat(document.getElementById('coord-z').value) || 0;
+    const descText = document.getElementById('report-desc').value.trim();
+    const sector = document.getElementById('report-sector').value;
 
-    listContainer.innerHTML = '';
-    const items = McpSimulator.storage.db;
+    appendTelemetryLog(`Broadcasting issue data stream to AI classifier...`, 'system-log');
     
-    const filteredItems = items.filter(item => {
-      if (activeVaultCategory === 'all') return true;
-      return item.category === activeVaultCategory;
-    });
+    // Trigger Scanning Animation
+    scanFrame.classList.add('scanning');
+    
+    // Reset Diagnostic box opacity
+    scanResults.classList.remove('scanned');
 
-    if (filteredItems.length === 0) {
-      listContainer.innerHTML = '<div class="empty-list">No entries found for this filter.</div>';
-      return;
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate scanning latency
+
+    // Classify using AI Engine
+    const weatherSelect = document.getElementById('weather-select');
+    const weatherVal = weatherSelect ? weatherSelect.value : 'clear';
+    const diag = AiEngine.diagnose(activePresetKey, descText);
+    
+    if (weatherVal === 'storm' || weatherVal === 'rain') {
+      diag.urgency = Math.min(10.0, parseFloat(diag.urgency) + 1.2).toFixed(1);
     }
 
-    filteredItems.forEach(item => {
-      const accessCheck = SecurityModule.checkAccess(item);
-      const card = document.createElement('div');
-      card.className = 'vault-card';
+    // Duplicate Check
+    const duplicate = AiEngine.checkDuplicate(xCoord, zCoord, issueRegistry);
 
-      const iconMap = {
-        document: '📄',
-        credentials: '🔑',
-        health: '🩺',
-        legacy: '📜'
-      };
+    scanFrame.classList.remove('scanning');
+    scanResults.classList.add('scanned');
 
-      const ownerName = SecurityModule.users[item.owner].name;
+    // Populate diagnostics box
+    document.getElementById('diag-type').innerText = diag.type;
+    document.getElementById('diag-severity').innerText = diag.severity;
+    document.getElementById('diag-severity').className = `severity-pill ${diag.severity.toLowerCase()}`;
+    document.getElementById('diag-urgency').innerText = `${diag.urgency}/10`;
+    document.getElementById('diag-dept').innerText = diag.department;
+    document.getElementById('diag-impact').innerText = diag.impact;
 
-      if (accessCheck.allowed) {
-        card.innerHTML = `
-          <div class="vault-info-left">
-            <div class="vault-icon-box">${iconMap[item.category] || '📁'}</div>
-            <div class="vault-details">
-              <h4>${item.title}</h4>
-              <p>Physical Location: <span class="loc-label">${item.location}</span></p>
-              <p style="margin-top:0.25rem; font-family:var(--font-body); background:rgba(255,255,255,0.03); padding:0.35rem 0.5rem; border-radius:4px; font-size:0.8rem;">
-                Vault Data: <code>${item.value}</code>
-              </p>
-            </div>
-          </div>
-          <div class="vault-info-right">
-            <span class="vault-owner-badge">Owner: ${ownerName.split(' ')[0]}</span>
-            <span class="vault-privacy-pill">${item.privacyLevel}</span>
-          </div>
-        `;
-      } else {
-        card.innerHTML = `
-          <div class="vault-info-left" style="opacity:0.6;">
-            <div class="vault-icon-box">🔒</div>
-            <div class="vault-details">
-              <h4>${item.title} (Restricted)</h4>
-              <p>Physical Location: <span class="text-muted">*Access Denied*</span></p>
-              <p style="margin-top:0.25rem; font-size:0.75rem; color:var(--accent-rose); font-style:italic;">
-                ⚠️ Access Blocked: ${accessCheck.reason}
-              </p>
-            </div>
-          </div>
-          <div class="vault-info-right">
-            <span class="vault-owner-badge" style="opacity:0.5;">Owner: ${ownerName.split(' ')[0]}</span>
-            <span class="vault-privacy-pill private">${item.privacyLevel}</span>
-          </div>
-        `;
-      }
+    if (duplicate) {
+      appendTelemetryLog(`[AI Engine] DUPLICATE DETECTED. Incident matches coordinate bounds of existing ticket #${duplicate.id}`, 'error-log');
       
-      listContainer.appendChild(card);
-    });
-  }
-
-  // Form Submission for uploading items
-  document.getElementById('btn-save-vault-item').addEventListener('click', async () => {
-    const title = document.getElementById('new-item-title').value.trim();
-    const category = document.getElementById('new-item-category').value;
-    const location = document.getElementById('new-item-location').value.trim() || 'Digital Archive';
-    const owner = document.getElementById('new-item-owner').value;
-    const value = document.getElementById('new-item-value').value.trim();
-
-    if (!title || !value) {
-      alert("Please fill in a title and node value content.");
-      return;
-    }
-
-    const privacyLevelMap = {
-      document: 'Restricted',
-      credentials: 'Family',
-      health: 'Emergency',
-      legacy: 'Family'
-    };
-
-    const newItem = {
-      title,
-      category,
-      owner,
-      location,
-      value,
-      privacyLevel: privacyLevelMap[category] || 'Family'
-    };
-
-    // Trigger loading nodes
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: `Initiating upload flow for new node: "${title}"`
-    });
-
-    await McpSimulator.storage.insert(newItem);
-    
-    // Clear inputs
-    document.getElementById('new-item-title').value = '';
-    document.getElementById('new-item-location').value = '';
-    document.getElementById('new-item-value').value = '';
-
-    renderVaultList();
-  });
-
-  // Form Submission for uploading Legacy items
-  document.getElementById('btn-save-legacy-item').addEventListener('click', async () => {
-    const title = document.getElementById('new-legacy-title').value.trim();
-    const subject = document.getElementById('new-legacy-member').value;
-    const voiceFile = document.getElementById('new-legacy-file').value.trim() || 'unnamed_clip.wav';
-    const privacy = document.getElementById('new-legacy-privacy').value;
-    const photo = document.getElementById('new-legacy-photo').value.trim();
-    const video = document.getElementById('new-legacy-video').value.trim();
-    const storyText = document.getElementById('new-legacy-story').value.trim();
-
-    if (!title || !storyText) {
-      alert("Please fill in a title and transcription story text.");
-      return;
-    }
-
-    const ownerMap = {
-      "Grandpa Robert": "dad",
-      "Grandma Elena": "grandma",
-      "Dad Arthur": "dad",
-      "Mom Sarah": "mom"
-    };
-
-    const newMemory = {
-      id: `legacy-story-${Date.now()}`,
-      subject: subject,
-      title: title,
-      story: storyText,
-      recordedDate: new Date().toISOString().substring(0, 10),
-      mediaType: "Audio Voice Clip",
-      mediaUrl: voiceFile,
-      verificationHash: `sha256-${Math.random().toString(16).substring(2, 18)}${Math.random().toString(16).substring(2, 18)}`,
-      verifiable: true,
-      confidenceScore: 1.00,
-      owner: ownerMap[subject] || 'dad',
-      privacyLevel: privacy,
-      photo: photo,
-      video: video
-    };
-
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: `Initiating hash verification check for new legacy voice clip: "${voiceFile}"`
-    });
-
-    // Insert into the simulator legacy memories list at the beginning (newest first)
-    McpSimulator.legacy.memories.unshift(newMemory);
-    
-    // Clear inputs
-    document.getElementById('new-legacy-title').value = '';
-    document.getElementById('new-legacy-file').value = '';
-    document.getElementById('new-legacy-photo').value = '';
-    document.getElementById('new-legacy-video').value = '';
-    document.getElementById('new-legacy-story').value = '';
-
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'success-log',
-      message: `Memory verified successfully. Digital voice matches profile. Integrity hash registered.`
-    });
-
-    // Re-render timeline
-    LegacyModule.renderTimeline();
-  });
-
-  // ==========================================
-  // Privacy Matrix Rendering
-  // ==========================================
-  function renderPrivacyMatrix() {
-    const tbody = document.getElementById('privacy-matrix-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-    const matrix = SecurityModule.getPermissionMatrix();
-
-    matrix.forEach(row => {
-      const tr = document.createElement('tr');
+      // Update UI with warning banner or alerts
+      document.getElementById('diag-impact').innerHTML = `⚠️ <span class="text-yellow">DUPLICATE ALERT: Same issue matches coordinates of ticket #${duplicate.id} (${duplicate.title})</span>. Telemetry archived as supporting consensus upvote instead.`;
       
-      let html = `
-        <td>
-          <strong>${row.name}</strong><br>
-          <span class="text-muted" style="font-size:0.7rem;">Owner: ${row.owner}</span>
-        </td>
-      `;
-
-      ['dad', 'mom', 'son', 'daughter', 'grandma'].forEach(u => {
-        const perm = row.permissions[u] || 'Deny';
-        let cls = 'deny';
-        if (perm.includes('Read/Write')) cls = 'read';
-        else if (perm.includes('Read')) cls = 'write';
-        else if (perm.includes('Emergency')) cls = 'emergency';
-
-        html += `<td class="perm-cell ${cls}">${perm}</td>`;
-      });
-
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // ==========================================
-  // Visualizer Node Connection SVG Engine
-  // ==========================================
-  function drawConnectorLines() {
-    const svg = document.getElementById('nodes-svg-links');
-    const container = document.getElementById('nodes-canvas-wrapper');
-    if (!svg || !container) return;
-    
-    svg.innerHTML = ''; // Clear SVG
-    
-    const connections = [
-      { from: 'node-user', to: 'node-concierge', id: 'link-user-concierge' },
-      { from: 'node-concierge', to: 'node-antigravity', id: 'link-concierge-antigravity' },
+      // Auto-vote up the duplicate instead
+      duplicate.votes += 1;
+      duplicate.consensus = Math.min(100, duplicate.consensus + 5);
       
-      { from: 'node-antigravity', to: 'node-emergency', id: 'link-antigravity-emergency' },
-      { from: 'node-antigravity', to: 'node-knowledge', id: 'link-antigravity-knowledge' },
-      { from: 'node-antigravity', to: 'node-legacy', id: 'link-antigravity-legacy' },
-      { from: 'node-antigravity', to: 'node-coordinator', id: 'link-antigravity-coordinator' },
-      { from: 'node-antigravity', to: 'node-privacy', id: 'link-antigravity-privacy' },
-      { from: 'node-antigravity', to: 'node-proactive', id: 'link-antigravity-proactive' },
-      
-      { from: 'node-emergency', to: 'node-mcp-medical', id: 'link-emergency-medical' },
-      { from: 'node-knowledge', to: 'node-mcp-storage', id: 'link-knowledge-storage' },
-      { from: 'node-legacy', to: 'node-mcp-legacy', id: 'link-legacy-legacy' },
-      { from: 'node-coordinator', to: 'node-mcp-calendar', id: 'link-coordinator-calendar' },
-
-      // Direct bypass links when talking directly to sub-agents
-      { from: 'node-user', to: 'node-emergency', id: 'link-user-emergency' },
-      { from: 'node-user', to: 'node-knowledge', id: 'link-user-knowledge' },
-      { from: 'node-user', to: 'node-legacy', id: 'link-user-legacy' },
-      { from: 'node-user', to: 'node-coordinator', id: 'link-user-coordinator' },
-      { from: 'node-user', to: 'node-privacy', id: 'link-user-privacy' },
-      { from: 'node-user', to: 'node-proactive', id: 'link-user-proactive' }
-    ];
-    
-    const containerRect = container.getBoundingClientRect();
-    
-    connections.forEach(conn => {
-      // Direct links logic: only render direct line if we are actively chatting with that sub-agent
-      if (conn.id.startsWith('link-user-') && conn.to !== 'node-concierge') {
-        const agentName = conn.to.replace('node-', '');
-        if (activeChatAgent !== agentName) return;
-      }
-
-      const fromEl = document.getElementById(conn.from);
-      const toEl = document.getElementById(conn.to);
-      if (!fromEl || !toEl) return;
-      
-      const fromRect = fromEl.getBoundingClientRect();
-      const toRect = toEl.getBoundingClientRect();
-      
-      // Centers relative to container
-      const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
-      const y1 = fromRect.top + fromRect.height / 2 - containerRect.top;
-      const x2 = toRect.left + toRect.width / 2 - containerRect.left;
-      const y2 = toRect.top + toRect.height / 2 - containerRect.top;
-      
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x1);
-      line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y2', y2);
-      line.setAttribute('id', conn.id);
-      
-      svg.appendChild(line);
-    });
-  }
-
-  // Visualizer controls hooks
-  function uiHighlightNode(nodeId, isHighlighted) {
-    const el = document.getElementById(`node-${nodeId}`);
-    if (el) {
-      if (isHighlighted) {
-        el.classList.add('highlighted');
-      } else {
-        el.classList.remove('highlighted');
-      }
-    }
-  }
-
-  function uiLineFlow(fromNode, toNode, level = 'normal') {
-    const lineId = `link-${fromNode}-${toNode}`;
-    const line = document.getElementById(lineId);
-    if (line) {
-      line.className.baseVal = level === 'emergency' ? 'flow-pulse-emergency' : 'flow-pulse';
-    }
-  }
-
-  function uiClearAllHighlights() {
-    document.querySelectorAll('.viz-node').forEach(node => {
-      node.classList.remove('highlighted');
-    });
-    document.querySelectorAll('#nodes-svg-links line').forEach(line => {
-      line.className.baseVal = '';
-    });
-    
-    // Status text set to idle
-    const statusText = document.getElementById('visualizer-status-indicator');
-    if (statusText) {
-      statusText.innerText = SecurityModule.emergencyModeActive ? "Emergency Active" : "Idle";
-      statusText.className = SecurityModule.emergencyModeActive ? "visualizer-status emergency" : "visualizer-status";
-    }
-  }
-
-  AgentSystem.setUiHandlers(uiHighlightNode, uiLineFlow, uiClearAllHighlights);
-
-  // Redraw links on window resizing
-  window.addEventListener('resize', drawConnectorLines);
-  // Brief delay to allow rendering offsets to compute
-  setTimeout(drawConnectorLines, 500);
-
-  // ==========================================
-  // AI Concierge Chat Dialog Binding (Multi-Chatbot support)
-  // ==========================================
-  let activeChatAgent = 'concierge';
-
-  const chatHistories = {
-    concierge: [
-      { sender: "Antigravity Concierge", text: "Welcome to the Family Concierge. Ask me anything. I can delegate your request to specialized agents (Knowledge, Legacy, Emergency) while ensuring strict role-based privacy filters.", isAi: true }
-    ],
-    knowledge: [
-      { sender: "Knowledge Agent", text: "Knowledge Agent direct terminal. Ask me directly about passwords, documents, locations, or recipes. (Queries typed here bypass the Concierge and talk to me directly.)", isAi: true }
-    ],
-    emergency: [
-      { sender: "Emergency Agent", text: "Emergency Agent direct terminal. Ask me directly about Grandma Elena's medical status, doctor numbers, allergies, or preferred hospital.", isAi: true }
-    ],
-    legacy: [
-      { sender: "Legacy Agent", text: "Legacy Agent direct terminal. Ask me directly about stories, recordings, or advice.", isAi: true }
-    ],
-    coordinator: [
-      { sender: "Coordinator Agent", text: "Coordinator Agent direct terminal. Ask me to list schedule details, or add a task via 'add task [details]'.", isAi: true }
-    ],
-    privacy: [
-      { sender: "Privacy Agent", text: "Privacy Agent direct terminal. Ask me to audit your current role's clearances or list folder security settings.", isAi: true }
-    ],
-    proactive: [
-      { sender: "Proactive Agent", text: "Proactive Agent direct terminal. Query me to trigger background scans.", isAi: true }
-    ]
-  };
-
-  const chatMessages = document.getElementById('chat-messages-container');
-  const chatInput = document.getElementById('chat-user-input');
-  const chatSendBtn = document.getElementById('chat-send-btn');
-  const clearChatBtn = document.getElementById('btn-clear-chat');
-
-  function renderActiveChatHistory() {
-    if (!chatMessages) return;
-    chatMessages.innerHTML = '';
-    const history = chatHistories[activeChatAgent] || [];
-    history.forEach(msg => {
-      appendChatBubbleHTML(msg.sender, msg.text, msg.isAi);
-    });
-  }
-
-  function appendChatBubbleHTML(sender, text, isAi = false) {
-    if (!chatMessages) return;
-
-    const msg = document.createElement('div');
-    msg.className = `message ${isAi ? 'ai' : 'user'}`;
-    
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    msg.innerHTML = `
-      <strong>${sender}:</strong>
-      <div>${text}</div>
-      <span class="message-meta">${timeStr}</span>
-    `;
-
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  async function handleUserChatMessage(text) {
-    const queryText = text.trim();
-    if (!queryText) return;
-
-    chatInput.value = '';
-
-    // Save to current history
-    const currentUser = SecurityModule.getActiveUserObj();
-    chatHistories[activeChatAgent].push({ sender: currentUser.name, text: queryText, isAi: false });
-    appendChatBubbleHTML(currentUser.name, queryText, false);
-
-    const statusText = document.getElementById('visualizer-status-indicator');
-    if (statusText) {
-      statusText.innerText = "Orchestrating";
-      statusText.className = "visualizer-status active";
-    }
-
-    let response;
-    let senderName = "Antigravity Twin";
-
-    // Route message depending on active chatbot agent
-    if (activeChatAgent === 'concierge') {
-      response = await AgentSystem.conciergeReceive(queryText);
-      senderName = "Antigravity Twin";
-    } else if (activeChatAgent === 'knowledge') {
-      response = await AgentSystem.knowledgeAgentReceive(queryText);
-      senderName = "Knowledge Agent";
-    } else if (activeChatAgent === 'emergency') {
-      response = await AgentSystem.emergencyAgentReceive(queryText);
-      senderName = "Emergency Agent";
-    } else if (activeChatAgent === 'legacy') {
-      response = await AgentSystem.legacyAgentReceive(queryText);
-      senderName = "Legacy Agent";
-    } else if (activeChatAgent === 'coordinator') {
-      response = await AgentSystem.coordinatorAgentReceive(queryText);
-      senderName = "Coordinator Agent";
-    } else if (activeChatAgent === 'privacy') {
-      response = await AgentSystem.privacyAgentReceive(queryText);
-      senderName = "Privacy Agent";
-    } else if (activeChatAgent === 'proactive') {
-      response = await AgentSystem.proactiveAgentReceive(queryText);
-      senderName = "Proactive Agent";
-    }
-
-    // Save AI reply to history
-    chatHistories[activeChatAgent].push({ sender: senderName, text: response.text, isAi: true });
-    appendChatBubbleHTML(senderName, response.text, true);
-
-    if (response.legacyItem) {
-      appendTelemetryLog({
-        timestamp: new Date().toISOString().substring(11, 19),
-        type: 'success-log',
-        message: `Verified Audio Track played in timeline: ${response.legacyItem.mediaUrl}`
-      });
-      switchView('legacy');
-    }
-
-    setTimeout(uiClearAllHighlights, 1500);
-  }
-
-  // Bind chatbot tabs switching
-  const chatAgentTabs = document.querySelectorAll('.agent-chat-tab');
-  const chatWrapperEl = document.getElementById('chat-wrapper-element');
-  const chatAgentTitle = document.getElementById('chat-agent-title');
-
-  chatAgentTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      chatAgentTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      const agent = tab.getAttribute('data-agent');
-      activeChatAgent = agent;
-
-      // Update Title & Class theme on Wrapper
-      chatWrapperEl.className = `chat-wrapper theme-${agent}`;
-      
-      const niceNameMap = {
-        concierge: "Antigravity Concierge Active",
-        knowledge: "Knowledge Agent Direct Mode",
-        emergency: "Emergency Agent Direct Mode",
-        legacy: "Legacy Agent Direct Mode",
-        coordinator: "Coordinator Agent Direct Mode",
-        privacy: "Privacy Agent Direct Mode",
-        proactive: "Proactive Agent Direct Mode"
-      };
-      
-      chatAgentTitle.innerText = niceNameMap[agent] || `${agent.charAt(0).toUpperCase() + agent.slice(1)} Agent Active`;
-
-      appendTelemetryLog({
-        timestamp: new Date().toISOString().substring(11, 19),
-        type: 'system',
-        message: `Chat channel switched to: ${agent.toUpperCase()} Agent Chatbot`
-      });
-
-      // Clear highlights and draw connection bypasses
-      uiClearAllHighlights();
-      drawConnectorLines();
-      
-      if (uiHighlightNode) {
-        uiHighlightNode('user', true);
-        uiHighlightNode(agent, true);
-        uiLineFlow('user', agent, agent === 'emergency' ? 'emergency' : 'normal');
-      }
-
-      renderActiveChatHistory();
-    });
-  });
-
-  chatSendBtn.addEventListener('click', () => {
-    handleUserChatMessage(chatInput.value);
-  });
-
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      handleUserChatMessage(chatInput.value);
-    }
-  });
-
-  // Clear chat trigger
-  clearChatBtn.addEventListener('click', () => {
-    const defaultWelcome = {
-      concierge: "Welcome to the Family Concierge. Ask me anything. I can delegate your request to specialized agents (Knowledge, Legacy, Emergency) while ensuring strict role-based privacy filters.",
-      knowledge: "Knowledge Agent direct terminal. Ask me directly about passwords, documents, locations, or recipes.",
-      emergency: "Emergency Agent direct terminal. Ask me directly about Grandma Elena's medical status, doctor numbers, allergies, or preferred hospital.",
-      legacy: "Legacy Agent direct terminal. Ask me directly about stories, recordings, or advice.",
-      coordinator: "Coordinator Agent direct terminal. Ask me to list schedule details, or add a task via 'add task [details]'.",
-      privacy: "Privacy Agent direct terminal. Ask me to audit your current role's clearances or list folder security settings.",
-      proactive: "Proactive Agent direct terminal. Query me to trigger background scans."
-    };
-
-    chatHistories[activeChatAgent] = [
-      { sender: `${activeChatAgent.charAt(0).toUpperCase() + activeChatAgent.slice(1)} Agent`, text: defaultWelcome[activeChatAgent], isAi: true }
-    ];
-    
-    renderActiveChatHistory();
-    
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: `${activeChatAgent.toUpperCase()} Agent Chat thread history reset.`
-    });
-  });
-
-  // Suggested prompt pills binding
-  document.querySelectorAll('.pill-btn').forEach(pill => {
-    pill.addEventListener('click', (e) => {
-      handleUserChatMessage(e.target.getAttribute('data-query'));
-    });
-  });
-
-  // ==========================================
-  // Preset Demo Workflows (Scenarios 1 to 4)
-  // ==========================================
-
-  // Scenario 1: Find Insurance (Son Denied -> Dad Approved)
-  document.getElementById('sim-scenario-1').addEventListener('click', async () => {
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: '*** DEMO WORKFLOW 1 STARTED: Privacy Check (Son vs. Dad) ***'
-    });
-
-    switchView('chat');
-    
-    // Step A: Switch to Son Leo
-    roleSelector.value = 'son';
-    handleRoleChange('son');
-    await AgentSystem.delay(800);
-
-    // Step B: Send Query as Son (Denied)
-    await handleUserChatMessage("Where is the insurance paper?");
-    await AgentSystem.delay(2800);
-
-    // Step C: Switch to Dad Arthur
-    roleSelector.value = 'dad';
-    handleRoleChange('dad');
-    await AgentSystem.delay(800);
-
-    // Step D: Send Query as Dad (Allowed)
-    await handleUserChatMessage("Where is the insurance paper?");
-  });
-
-  // Scenario 2: Emergency Mode Activation
-  const emergencyTrigger = document.getElementById('btn-emergency-trigger');
-  const simScenario2 = document.getElementById('sim-scenario-2');
-  const emergencyOverlay = document.getElementById('emergency-overlay');
-  const btnResolveEmergency = document.getElementById('btn-resolve-emergency');
-
-  async function triggerEmergencyPipeline() {
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'error-log',
-      message: '*** DETECTED CRITICAL ALARM: GRANDMA ELENA COLLAPSED ***'
-    });
-
-    // Run parallel agents
-    const response = await AgentSystem.orchestrateEmergency();
-
-    // Populate Emergency Dashboard elements
-    document.getElementById('em-subject-name').innerText = `${response.profile.name} (Grandma)`;
-    document.getElementById('em-subject-blood').innerText = response.profile.bloodGroup;
-    
-    const allergyBadge = document.getElementById('em-subject-allergies');
-    allergyBadge.innerText = response.profile.allergies.join(', ');
-
-    // Render medicines list
-    const medsUl = document.getElementById('em-subject-meds');
-    medsUl.innerHTML = '';
-    response.meds.forEach(med => {
-      const li = document.createElement('li');
-      li.className = 'em-med-item';
-      li.innerHTML = `
-        <strong>${med.name}</strong>
-        <span>Schedule: ${med.schedule} (${med.purpose})</span>
-      `;
-      medsUl.appendChild(li);
-    });
-
-    // Populate contacts
-    document.getElementById('em-subject-doc').innerText = response.profile.doctor;
-    document.getElementById('em-subject-hosp').innerText = response.profile.hospital;
-    document.getElementById('em-subject-ins-provider').innerText = response.insurance.provider;
-    document.getElementById('em-subject-ins-policy').innerText = response.insurance.policyNum;
-    document.getElementById('em-subject-ins-loc').innerText = response.insurance.location;
-
-    // Render coordinator tasks
-    const tasksDiv = document.getElementById('em-coordinator-tasks');
-    tasksDiv.innerHTML = '';
-    response.tasks.forEach(t => {
-      const pill = document.createElement('div');
-      pill.className = 'task-pill';
-      pill.innerText = t;
-      tasksDiv.appendChild(pill);
-    });
-
-    // Show high-visibility warning panel overlay
-    emergencyOverlay.classList.add('active');
-
-    // Visualizer status indicator
-    const statusText = document.getElementById('visualizer-status-indicator');
-    if (statusText) {
-      statusText.innerText = "Emergency Active";
-      statusText.className = "visualizer-status emergency";
-    }
-  }
-
-  emergencyTrigger.addEventListener('click', triggerEmergencyPipeline);
-  simScenario2.addEventListener('click', triggerEmergencyPipeline);
-
-  // Close Emergency Modal
-  btnResolveEmergency.addEventListener('click', () => {
-    emergencyOverlay.classList.remove('active');
-    SecurityModule.setEmergencyMode(false);
-    uiClearAllHighlights();
-
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'success-log',
-      message: 'Emergency state cleared. Returning agent nodes to idle state.'
-    });
-  });
-
-  // Scenario 3: Grandpa's Memory
-  document.getElementById('sim-scenario-3').addEventListener('click', async () => {
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: '*** DEMO WORKFLOW 3 STARTED: Verified Legacy Retrieval ***'
-    });
-
-    switchView('chat');
-    await AgentSystem.delay(400);
-    await handleUserChatMessage("Tell me Grandpa's favorite story.");
-  });
-
-  // Scenario 4: Proactive Audit Scan
-  document.getElementById('sim-scenario-4').addEventListener('click', async () => {
-    appendTelemetryLog({
-      timestamp: new Date().toISOString().substring(11, 19),
-      type: 'system',
-      message: '*** DEMO WORKFLOW 4 STARTED: Background Proactive Scanning ***'
-    });
-
-    // Trigger agent scan
-    const alerts = await AgentSystem.runProactiveAudit();
-    
-    // Update alert feed HTML
-    ProactiveModule.renderAlerts(alerts);
-    
-    // Switch to dashboard view to see alerts
-    switchView('dashboard');
-    
-    setTimeout(uiClearAllHighlights, 2000);
-  });
-
-  // Global Search AI Input Binding
-  const globalSearchInput = document.getElementById('global-search-ai');
-  if (globalSearchInput) {
-    globalSearchInput.addEventListener('keypress', async (e) => {
-      if (e.key === 'Enter') {
-        const query = globalSearchInput.value.trim();
-        if (!query) return;
-        
-        globalSearchInput.value = ''; // Clear search bar
-        
-        // 1. Switch to Chat View
-        switchView('chat');
-        
-        // 2. Select the Knowledge Agent Chatbot Tab
-        const knowledgeTab = document.querySelector('.agent-chat-tab[data-agent="knowledge"]');
-        if (knowledgeTab) {
-          knowledgeTab.click(); // Switches agent, updates themes, history, highlights
-        }
-        
-        // 3. Submit the search query directly to the Knowledge Agent Chatbot!
-        await handleUserChatMessage(query);
-      }
-    });
-  }
-
-  // ==========================================
-  // Ambient Relaxing Music Controller
-  // ==========================================
-  const bgMusic = document.getElementById('bg-relaxing-music');
-  const btnAmbient = document.getElementById('btn-ambient-music');
-
-  function toggleAmbientMusic() {
-    if (!bgMusic || !btnAmbient) return;
-    
-    const musicIcon = btnAmbient.querySelector('.music-icon');
-    const musicText = btnAmbient.querySelector('span:not(.music-icon)');
-
-    if (bgMusic.paused) {
-      bgMusic.play().then(() => {
-        btnAmbient.classList.add('playing');
-        if (musicIcon) musicIcon.innerText = '🔊';
-        if (musicText) musicText.innerText = 'Ambience: On';
-        appendTelemetryLog({
-          timestamp: new Date().toISOString().substring(11, 19),
-          type: 'success-log',
-          message: 'Ambient relaxing music started playing in background.'
-        });
-      }).catch(e => {
-        console.log("Autoplay blocked by browser policy. Interacting first required.", e);
-      });
+      // Award minor XP for upvoting
+      userProfiles[currentUserKey].xp += 25;
+      handleRoleChange(currentUserKey);
     } else {
-      bgMusic.pause();
-      btnAmbient.classList.remove('playing');
-      if (musicIcon) musicIcon.innerText = '🔇';
-      if (musicText) musicText.innerText = 'Ambience: Off';
-      appendTelemetryLog({
-        timestamp: new Date().toISOString().substring(11, 19),
-        type: 'system',
-        message: 'Ambient background music paused.'
+      // Create new ticket
+      const newIssue = {
+        id: `CIV-${Math.floor(1000 + Math.random() * 9000)}`,
+        category: activePresetKey,
+        title: diag.type + " " + sector,
+        desc: descText || `Citizen reported ${diag.type} at Sector coordinates [${xCoord}, ${zCoord}]`,
+        sector: sector,
+        x: xCoord,
+        z: zCoord,
+        severity: diag.severity,
+        urgency: parseFloat(diag.urgency),
+        department: diag.department,
+        impact: diag.impact,
+        status: "Reported",
+        votes: 1,
+        consensus: 50,
+        reportedBy: userProfiles[currentUserKey].name,
+        timestamp: new Date().toISOString()
+      };
+
+      issueRegistry.push(newIssue);
+      appendTelemetryLog(`[AI Engine] Diagnostic complete: Registered new incident ${newIssue.id}. Routing to ${newIssue.department}.`, 'success-log');
+
+      // Create 3D marker in twin city
+      if (window.City3D && City3D.addIssueMarker) {
+        City3D.addIssueMarker(newIssue);
+      }
+
+      // Update XP & statistics
+      userProfiles[currentUserKey].xp += 100;
+      userProfiles[currentUserKey].reports += 1;
+      handleRoleChange(currentUserKey);
+      updateCityStats();
+
+      // Clear input form
+      document.getElementById('report-desc').value = '';
+    }
+  });
+
+  // ==========================================
+  // Verification Feed (consensus processing)
+  // ==========================================
+  const feedGrid = document.getElementById('verification-feed-grid');
+  
+  // Filters
+  let activeFeedFilter = 'all';
+  document.getElementById('btn-filter-all').addEventListener('click', () => setFeedFilter('all'));
+  document.getElementById('btn-filter-critical').addEventListener('click', () => setFeedFilter('critical'));
+  document.getElementById('btn-filter-duplicates').addEventListener('click', () => setFeedFilter('duplicates'));
+
+  function setFeedFilter(filter) {
+    document.querySelectorAll('.filter-buttons .btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-filter-${filter}`).classList.add('active');
+    activeFeedFilter = filter;
+    renderVerificationFeed();
+  }
+
+  function renderVerificationFeed() {
+    if (!feedGrid) return;
+    feedGrid.innerHTML = '';
+
+    // Filter items
+    let items = issueRegistry.filter(i => i.status !== 'Resolved');
+    if (activeFeedFilter === 'critical') {
+      items = items.filter(i => i.severity.toLowerCase() === 'critical');
+    } else if (activeFeedFilter === 'duplicates') {
+      // Find items with duplicates nearby just for visualization
+      items = items.filter(i => {
+        const others = issueRegistry.filter(o => o.id !== i.id && o.status !== 'Resolved');
+        return AiEngine.checkDuplicate(i.x, i.z, others, 10.0) !== null;
       });
     }
-  }
 
-  if (btnAmbient) {
-    btnAmbient.addEventListener('click', toggleAmbientMusic);
-  }
+    if (items.length === 0) {
+      feedGrid.innerHTML = '<div class="empty-list">No pending reports match this telemetry filter.</div>';
+      return;
+    }
 
-  // Try to play immediately on page load (in case browser allows it)
-  if (bgMusic) {
-    bgMusic.play().then(() => {
-      appendTelemetryLog({
-        timestamp: new Date().toISOString().substring(11, 19),
-        type: 'success-log',
-        message: 'Ambient background music started automatically.'
+    items.forEach(issue => {
+      const card = document.createElement('div');
+      card.className = 'feed-card';
+
+      // Check duplicates again to show UI warnings
+      const others = issueRegistry.filter(o => o.id !== issue.id && o.status !== 'Resolved');
+      const isDuplicate = AiEngine.checkDuplicate(issue.x, issue.z, others, 10.0) !== null;
+
+      if (isDuplicate) {
+        card.className += ' warn-duplicate';
+      }
+
+      card.innerHTML = `
+        ${isDuplicate ? `<div class="duplicate-alert-banner"><i data-lucide="alert-triangle"></i> Proximity duplicate warning</div>` : ''}
+        <div class="feed-card-header">
+          <div>
+            <h4>${issue.title}</h4>
+            <span class="lbl">ID: ${issue.id} • ${issue.sector}</span>
+          </div>
+          <span class="severity-pill ${issue.severity.toLowerCase()}">${issue.severity}</span>
+        </div>
+        <p class="feed-card-body">${issue.desc}</p>
+        <div class="feed-card-footer">
+          <div class="consensus-count">
+            <i data-lucide="users"></i> <span>${issue.votes} upvotes (${issue.consensus}% consensus)</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn btn-tiny btn-cyber-primary btn-upvote" data-id="${issue.id}">
+              <i data-lucide="thumbs-up"></i> Verify
+            </button>
+            <button class="btn btn-tiny btn-secondary btn-focus-twin" data-id="${issue.id}">
+              <i data-lucide="focus"></i> Map
+            </button>
+          </div>
+        </div>
+      `;
+
+      feedGrid.appendChild(card);
+    });
+
+    // Reinitialize lucide icons inside dynamically created cards
+    lucide.createIcons();
+
+    // Bind upvote click handlers
+    document.querySelectorAll('.btn-upvote').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        upvoteIssue(id);
       });
-    }).catch(e => {
-      console.log("Autoplay on load blocked. Awaiting user interaction.");
+    });
+
+    // Bind focus click handlers
+    document.querySelectorAll('.btn-focus-twin').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const issue = issueRegistry.find(i => i.id === id);
+        if (issue) {
+          switchView('twin');
+          if (window.City3D && City3D.focusCamera) {
+            City3D.focusCamera(issue.x, issue.z);
+          }
+        }
+      });
     });
   }
 
-  // Attempt to play on first user interaction anywhere on the body if it is still paused and user hasn't turned it off
-  document.body.addEventListener('click', () => {
-    if (bgMusic && bgMusic.paused && btnAmbient && btnAmbient.classList.contains('playing')) {
-      bgMusic.play().then(() => {
-        appendTelemetryLog({
-          timestamp: new Date().toISOString().substring(11, 19),
-          type: 'success-log',
-          message: 'Ambient background music activated automatically upon user interaction.'
-        });
-      }).catch(e => {
-        // Safe to ignore
-      });
-    }
-  }, { once: true });
+  function upvoteIssue(issueId) {
+    const issue = issueRegistry.find(i => i.id === issueId);
+    if (!issue) return;
 
-  // Trigger default Proactive audit on startup
-  setTimeout(async () => {
-    const alerts = await AgentSystem.runProactiveAudit();
-    ProactiveModule.renderAlerts(alerts);
-    uiClearAllHighlights();
-  }, 1000);
+    issue.votes += 1;
+    // Calculate consensus increases
+    issue.consensus = Math.min(100, issue.consensus + 8);
+    
+    appendTelemetryLog(`[Community Feed] Upvote cast on issue ${issue.id} (${issue.title})`, 'success-log');
+
+    // Lifecycle state promotion based on votes / consensus threshold
+    if (issue.status === 'Reported' && issue.votes >= 3) {
+      issue.status = 'Verified';
+      appendTelemetryLog(`[AI Engine] Issue ${issue.id} has achieved consensus validation threshold. Upgraded status to VERIFIED.`, 'success-log');
+    } else if (issue.status === 'Verified' && issue.votes >= 8) {
+      issue.status = 'Assigned';
+      appendTelemetryLog(`[AI Engine] Issue ${issue.id} dispatched to ${issue.department}. Status upgraded to ASSIGNED.`, 'ai-log');
+    }
+
+    // Award XP
+    userProfiles[currentUserKey].xp += 30;
+    userProfiles[currentUserKey].votes += 1;
+    handleRoleChange(currentUserKey);
+    
+    renderVerificationFeed();
+    updateCityStats();
+  }
+
+  // ==========================================
+  // Gamification & Level Upgrades
+  // ==========================================
+  function updateGamificationView() {
+    const profile = userProfiles[currentUserKey];
+    if (!profile) return;
+
+    // Calculate level overlay details
+    const levelOverlayNum = document.querySelector('.level-num');
+    const levelOverlayLbl = document.querySelector('.level-lbl');
+    const circleFill = document.querySelector('.circle-fill');
+
+    if (levelOverlayNum) {
+      // Calculate level based on XP
+      const computedLvl = Math.floor(profile.xp / 400) + 1;
+      profile.level = computedLvl;
+      
+      let badgeTitle = 'Citizen';
+      if (computedLvl >= 5) badgeTitle = 'Civic Legend';
+      else if (computedLvl >= 3) badgeTitle = 'Civic Hero';
+      else if (computedLvl >= 2) badgeTitle = 'Trusted Reporter';
+
+      profile.role = badgeTitle;
+
+      levelOverlayNum.innerText = `Lvl ${computedLvl}`;
+      levelOverlayLbl.innerText = badgeTitle;
+
+      // Adjust circular progress meter (dashoffset calculations)
+      // circumference = 2 * PI * r = 2 * 3.14 * 40 = 251.2
+      const nextLevelXp = computedLvl * 400;
+      const currentLevelBaseXp = (computedLvl - 1) * 400;
+      const xpInThisLevel = profile.xp - currentLevelBaseXp;
+      const progressPct = xpInThisLevel / 400;
+      const offset = 251.2 - (progressPct * 251.2);
+      circleFill.style.strokeDashoffset = offset;
+    }
+
+    // Update stats recap row
+    const recapItems = document.querySelectorAll('.stat-recap-item .recap-num');
+    if (recapItems.length >= 3) {
+      recapItems[0].innerText = profile.reports;
+      recapItems[1].innerText = profile.votes;
+      recapItems[2].innerText = `${profile.trust}%`;
+    }
+
+    // Re-render badges list classes based on levels
+    const badgeCards = document.querySelectorAll('.badges-grid .badge-card');
+    if (badgeCards.length >= 4) {
+      if (profile.level >= 1) badgeCards[0].className = 'badge-card unlocked'; // Guardian
+      if (profile.level >= 3) badgeCards[1].className = 'badge-card unlocked'; // Hazard
+      if (profile.level >= 4) badgeCards[2].className = 'badge-card unlocked'; // Aqua
+      if (profile.level >= 5) badgeCards[3].className = 'badge-card unlocked'; // King
+      else badgeCards[3].className = 'badge-card locked';
+    }
+  }
+
+  // ==========================================
+  // Global Stats Updates
+  // ==========================================
+  function updateCityStats() {
+    const activeCount = issueRegistry.filter(i => i.status !== 'Resolved').length;
+    const resolvedCount = issueRegistry.filter(i => i.status === 'Resolved').length;
+    const health = AiEngine.calculateCityHealth(issueRegistry);
+
+    const healthEl = document.getElementById('stat-city-health');
+    const activeEl = document.getElementById('stat-active-issues');
+    const votesEl = document.getElementById('stat-votes-count');
+
+    if (healthEl) healthEl.innerText = `${health}%`;
+    if (activeEl) activeEl.innerText = activeCount;
+    if (votesEl) {
+      const totalVotes = issueRegistry.reduce((acc, curr) => acc + curr.votes, 0);
+      votesEl.innerText = totalVotes;
+    }
+
+    // Adjust health coloring indicator class
+    if (healthEl) {
+      if (health >= 85) healthEl.className = 'stat-val text-green';
+      else if (health >= 65) healthEl.className = 'stat-val text-yellow';
+      else healthEl.className = 'stat-val text-red';
+    }
+  }
+
+  // ==========================================
+  // Inspect / Prevent button handler in Dashboard
+  // ==========================================
+  document.querySelectorAll('.btn-prevent').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const sector = e.currentTarget.getAttribute('data-sec');
+      const type = e.currentTarget.getAttribute('data-type');
+      
+      appendTelemetryLog(`[Preventative Maintenance] Drone dispatched to Sector ${sector} for preventive ${type} scan.`, 'success-log');
+      
+      // Auto upgrade XP
+      userProfiles[currentUserKey].xp += 50;
+      handleRoleChange(currentUserKey);
+    });
+  });
+
+  // ==========================================
+  // 3D Twin View Interaction Toggles
+  // ==========================================
+  const timeSlider = document.getElementById('time-slider');
+  const btnToggleFog = document.getElementById('btn-toggle-fog');
+  const btnToggleHeatmap = document.getElementById('btn-toggle-heatmap');
+  const btnToggleTraffic = document.getElementById('btn-toggle-traffic');
+  const btnCameraCinematic = document.getElementById('btn-camera-cinematic');
+  const btnCameraFree = document.getElementById('btn-camera-free');
+
+  timeSlider.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    if (window.City3D && City3D.setTimeOfDay) {
+      City3D.setTimeOfDay(val);
+    }
+  });
+
+  const weatherSelect = document.getElementById('weather-select');
+  if (weatherSelect) {
+    weatherSelect.addEventListener('change', (e) => {
+      const type = e.target.value;
+      if (window.City3D && City3D.setWeather) {
+        City3D.setWeather(type);
+      }
+      appendTelemetryLog(`[Weather System] Active weather preset updated to: ${type.toUpperCase()}`, 'system-log');
+    });
+  }
+
+  btnToggleFog.addEventListener('click', () => {
+    btnToggleFog.classList.toggle('active');
+    const active = btnToggleFog.classList.contains('active');
+    if (window.City3D && City3D.setFog) {
+      City3D.setFog(active);
+    }
+  });
+
+  btnToggleHeatmap.addEventListener('click', () => {
+    btnToggleHeatmap.classList.toggle('active');
+    const active = btnToggleHeatmap.classList.contains('active');
+    if (window.City3D && City3D.setHeatmap) {
+      City3D.setHeatmap(active);
+    }
+  });
+
+  btnToggleTraffic.addEventListener('click', () => {
+    btnToggleTraffic.classList.toggle('active');
+    const active = btnToggleTraffic.classList.contains('active');
+    if (window.City3D && City3D.setTraffic) {
+      City3D.setTraffic(active);
+    }
+  });
+
+  btnCameraCinematic.addEventListener('click', () => {
+    btnCameraCinematic.classList.add('active');
+    btnCameraFree.classList.remove('active');
+    if (window.City3D) {
+      City3D.isCinematic = true;
+      City3D.controls.enabled = false;
+      appendTelemetryLog(`[3D Twin] Drone Camera fly-through mode initialized. Controls locked.`, 'system-log');
+    }
+  });
+
+  btnCameraFree.addEventListener('click', () => {
+    btnCameraFree.classList.add('active');
+    btnCameraCinematic.classList.remove('active');
+    if (window.City3D) {
+      City3D.isCinematic = false;
+      City3D.controls.enabled = true;
+      appendTelemetryLog(`[3D Twin] Dynamic camera Orbit control returned to user session.`, 'system-log');
+    }
+  });
+
+  // ==========================================
+  // 3D Twin Raycaster Marker Interaction Callback
+  // ==========================================
+  const aiInsightsPanel = document.getElementById('ai-insights-panel');
+  const btnCloseInsights = document.getElementById('btn-close-insights');
+  const btnVoteInsight = document.getElementById('btn-vote-insight');
+  
+  let selectedIssueIdFromMarker = null;
+
+  function onMarkerClickCallback(issue) {
+    selectedIssueIdFromMarker = issue.id;
+    
+    // Fill insights panel data
+    document.getElementById('ins-asset-id').innerText = `#CIV-${issue.id.split('-')[1] || issue.id}`;
+    document.getElementById('ins-type').innerText = issue.title;
+    document.getElementById('ins-severity').innerText = issue.severity;
+    document.getElementById('ins-severity').className = `severity-pill ${issue.severity.toLowerCase()}`;
+    document.getElementById('ins-urgency').innerText = `${issue.urgency}/10`;
+    document.getElementById('ins-dept').innerText = issue.department;
+    document.getElementById('ins-prediction').innerText = issue.impact;
+    
+    // Consensus bar
+    const consensusFill = document.getElementById('ins-consensus-fill');
+    const consensusText = document.getElementById('ins-consensus-text');
+    if (consensusFill && consensusText) {
+      consensusFill.style.width = `${issue.consensus}%`;
+      consensusText.innerText = `${issue.consensus}% Consensus (${issue.votes} Verified Votes)`;
+    }
+
+    // Toggle panel visible
+    aiInsightsPanel.classList.add('visible');
+    
+    // Focus camera
+    if (window.City3D && City3D.focusCamera) {
+      City3D.focusCamera(issue.x, issue.z);
+    }
+
+    appendTelemetryLog(`[3D Twin] Focused camera on marker. Accessing database parameters for ${issue.id}.`, 'system-log');
+  }
+
+  btnCloseInsights.addEventListener('click', () => {
+    aiInsightsPanel.classList.remove('visible');
+  });
+
+  btnVoteInsight.addEventListener('click', () => {
+    if (selectedIssueIdFromMarker) {
+      upvoteIssue(selectedIssueIdFromMarker);
+      
+      // Update insights screen consensus values live
+      const issue = issueRegistry.find(i => i.id === selectedIssueIdFromMarker);
+      if (issue) {
+        const consensusFill = document.getElementById('ins-consensus-fill');
+        const consensusText = document.getElementById('ins-consensus-text');
+        if (consensusFill && consensusText) {
+          consensusFill.style.width = `${issue.consensus}%`;
+          consensusText.innerText = `${issue.consensus}% Consensus (${issue.votes} Verified Votes)`;
+        }
+      }
+    }
+  });
+
+  // ==========================================
+  // Initialize Modules & Sub-systems
+  // ==========================================
+  
+  // 1. Init 3D digital twin
+  setTimeout(() => {
+    City3D.init('city-twin-canvas-container', onMarkerClickCallback);
+
+    // Populate Initial Markers
+    issueRegistry.forEach(issue => {
+      if (issue.status !== 'Resolved') {
+        City3D.addIssueMarker(issue);
+      }
+    });
+
+    // Draw Heatmap initially if checked
+    const heatmapBtnActive = btnToggleHeatmap.classList.contains('active');
+    City3D.setHeatmap(heatmapBtnActive);
+  }, 100);
+
+  // 2. Init Jarvis Assistant
+  ChatAssistant.init(
+    'jarvis-chat-messages',
+    'jarvis-input',
+    'btn-jarvis-send',
+    () => issueRegistry
+  );
+
+  // 3. Init local widgets
+  initPerformanceChart();
+  updateCityStats();
+  handleRoleChange('hero');
 
 });
