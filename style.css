@@ -329,6 +329,7 @@ body {
   position: relative;
   overflow: hidden;
   border-right: 1px solid var(--border-glass);
+  pointer-events: none;
 }
 
 .top-bar, .content-frame, .app-view {
