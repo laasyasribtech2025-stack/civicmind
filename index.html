@@ -119,6 +119,16 @@
         <span>🛸 Controls: WASD / Arrows to Fly • Drag to Look • Q/E to Height</span>
       </div>
 
+      <!-- Cyber D-Pad flight navigator -->
+      <div class="twin-dpad-controls" style="position: absolute; bottom: 2rem; right: 2rem; z-index: 4; display: grid; grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(2, 38px); gap: 0.35rem; pointer-events: auto;">
+        <button class="btn btn-cyber-secondary btn-tiny" id="btn-dpad-up" title="Ascend (Fly Up)" style="grid-column: 1 / 2; padding: 0.25rem; font-size: 0.7rem;"><i data-lucide="chevrons-up" style="width: 14px; height: 14px; vertical-align: middle;"></i> Fly Up</button>
+        <button class="btn btn-cyber-primary btn-tiny" id="btn-dpad-forward" title="Fly Forward (W)" style="grid-column: 2 / 3; padding: 0.25rem; font-size: 0.75rem; font-weight: bold;">Forward</button>
+        <button class="btn btn-cyber-secondary btn-tiny" id="btn-dpad-down" title="Descend (Fly Down)" style="grid-column: 3 / 4; padding: 0.25rem; font-size: 0.7rem;"><i data-lucide="chevrons-down" style="width: 14px; height: 14px; vertical-align: middle;"></i> Fly Dn</button>
+        <button class="btn btn-cyber-primary btn-tiny" id="btn-dpad-left" title="Strafe Left (A)" style="padding: 0.25rem; font-size: 0.75rem; font-weight: bold;">Left</button>
+        <button class="btn btn-cyber-primary btn-tiny" id="btn-dpad-backward" title="Fly Backward (S)" style="padding: 0.25rem; font-size: 0.75rem; font-weight: bold;">Backward</button>
+        <button class="btn btn-cyber-primary btn-tiny" id="btn-dpad-right" title="Strafe Right (D)" style="padding: 0.25rem; font-size: 0.75rem; font-weight: bold;">Right</button>
+      </div>
+
       <!-- AI Floating Insights Panel -->
       <div class="ai-insights-panel" id="ai-insights-panel">
         <div class="panel-header">

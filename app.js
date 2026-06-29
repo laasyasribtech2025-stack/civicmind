@@ -177,6 +177,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Connect on-screen D-Pad flight buttons to City3D keys state
+  const dpadButtons = [
+    { id: 'btn-dpad-forward', key: 'w' },
+    { id: 'btn-dpad-backward', key: 's' },
+    { id: 'btn-dpad-left', key: 'a' },
+    { id: 'btn-dpad-right', key: 'd' },
+    { id: 'btn-dpad-up', key: 'e' },
+    { id: 'btn-dpad-down', key: 'q' }
+  ];
+
+  dpadButtons.forEach(btnInfo => {
+    const btnEl = document.getElementById(btnInfo.id);
+    if (btnEl) {
+      btnEl.addEventListener('mousedown', () => { City3D.keys[btnInfo.key] = true; });
+      btnEl.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        City3D.keys[btnInfo.key] = true; 
+      });
+      btnEl.addEventListener('mouseup', () => { City3D.keys[btnInfo.key] = false; });
+      btnEl.addEventListener('mouseleave', () => { City3D.keys[btnInfo.key] = false; });
+      btnEl.addEventListener('touchend', () => { City3D.keys[btnInfo.key] = false; });
+    }
+  });
+
   // ==========================================
   // Telemetry Console Logger
   // ==========================================
@@ -786,8 +810,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   
   // 1. Init 3D digital twin
+  const onSensorDetectionCallback = (pedId, issueId) => {
+    const issue = issueRegistry.find(i => i.id === issueId);
+    if (!issue) return;
+
+    // Log to telemetry panel
+    appendTelemetryLog(`[Sensor Node #${pedId}] Proximity scan matched active anomaly #${issueId}: ${issue.title} in Sector ${issue.sector}.`, "success-log");
+
+    // Add a minor consensus vote to this issue
+    issue.votes += 1;
+    updateIssuesList();
+
+    // Spawn a temporary Jarvis assistant message alert in the chat!
+    if (Math.random() > 0.6) {
+      const messagesContainer = document.getElementById('jarvis-chat-messages');
+      if (messagesContainer) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message bot-message';
+        msgDiv.innerHTML = `
+          <div class="bot-header" style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+            <span class="bot-name" style="color: var(--cyan); font-weight: 600;"><i data-lucide="bot" style="width: 12px; height: 12px; vertical-align: middle;"></i> Jarvis AI</span>
+            <span class="bot-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+          <div class="bot-text" style="font-size: 0.8rem; line-height: 1.3;">
+            Notice: Mobile sensor #${pedId} validated telemetry status for active issue #${issueId} (${issue.title}). Consensus telemetry increased.
+          </div>
+        `;
+        messagesContainer.appendChild(msgDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  };
+
   setTimeout(() => {
-    City3D.init('city-twin-canvas-container', onMarkerClickCallback);
+    City3D.init('city-twin-canvas-container', onMarkerClickCallback, onSensorDetectionCallback);
 
     // Populate Initial Markers
     issueRegistry.forEach(issue => {

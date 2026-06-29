@@ -27,14 +27,20 @@ const City3D = {
   rainSystem: null,
   weatherState: 'clear',
   keys: {},
+  riverMesh: null,
+  scannerMesh: null,
+  scannerRadius: 0.1,
+  pedestrians: [],
+  onSensorDetection: null,
   
   // Animation path parameter
   pathTime: 0,
   onMarkerClick: null,
 
-  init: function(containerId, onMarkerClick) {
+  init: function(containerId, onMarkerClick, onSensorDetection) {
     this.container = document.getElementById(containerId);
     if (!this.container) return;
+    this.onSensorDetection = onSensorDetection;
 
     // Clear loader if present
     this.container.innerHTML = '';
@@ -84,11 +90,27 @@ const City3D = {
     this.rimLight.position.set(-40, 20, -20);
     this.scene.add(this.rimLight);
 
-    // 6. Generate City Grid (Ground + Buildings)
+    // 6. Generate City Grid (Ground + Buildings + River + Trees)
     this.buildCityGround();
     this.generateProceduralBuildings();
+    this.addTreesAndStreetlights();
     this.createTrafficFlow();
+    this.createPedestrians();
     
+    // Create expanding scanner radar mesh
+    const scannerGeom = new THREE.RingGeometry(0.1, 5, 32);
+    const scannerMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.22,
+      wireframe: true
+    });
+    this.scannerMesh = new THREE.Mesh(scannerGeom, scannerMat);
+    this.scannerMesh.rotation.x = -Math.PI / 2;
+    this.scannerMesh.position.set(0, 0.15, 0); // Hover above ground
+    this.scene.add(this.scannerMesh);
+
     // 7. Raycaster Setup for marker clicking
     this.setupRaycasting();
 
@@ -124,6 +146,22 @@ const City3D = {
     const gridHelper = new THREE.GridHelper(300, 60, 0x00f0ff, 0x12183a);
     gridHelper.position.y = 0.02;
     this.scene.add(gridHelper);
+
+    // Add futuristic flowing river (plane geometry with segments for wave animations)
+    const riverGeom = new THREE.PlaneGeometry(300, 20, 64, 4);
+    const riverMat = new THREE.MeshStandardMaterial({
+      color: 0x0088ff,
+      emissive: 0x002266,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.8,
+      flatShading: true
+    });
+    this.riverMesh = new THREE.Mesh(riverGeom, riverMat);
+    this.riverMesh.rotation.x = -Math.PI / 2;
+    this.riverMesh.position.set(0, 0.08, 0); // Sit exactly above ground
+    this.scene.add(this.riverMesh);
   },
 
   generateProceduralBuildings: function() {
@@ -203,6 +241,94 @@ const City3D = {
     buildingMesh.userData.glowMesh = windowGlow;
   },
 
+  addTreesAndStreetlights: function() {
+    // Add trees along the river bank (Z = 12 and Z = -12)
+    const treeTrunkGeom = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+    const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+    const treeLeavesGeom = new THREE.ConeGeometry(1.2, 2.5, 8);
+    const treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x00aa33, roughness: 0.9 });
+
+    for (let x = -140; x <= 140; x += 18) {
+      if (Math.abs(x) < 15) continue; // Skip city center intersections
+
+      // North bank trees
+      const trunkN = new THREE.Mesh(treeTrunkGeom, treeTrunkMat);
+      trunkN.position.set(x, 1.0, 12);
+      const leavesN = new THREE.Mesh(treeLeavesGeom, treeLeavesMat);
+      leavesN.position.set(x, 3.0, 12);
+      this.scene.add(trunkN);
+      this.scene.add(leavesN);
+
+      // South bank trees
+      const trunkS = new THREE.Mesh(treeTrunkGeom, treeTrunkMat);
+      trunkS.position.set(x, 1.0, -12);
+      const leavesS = new THREE.Mesh(treeLeavesGeom, treeLeavesMat);
+      leavesS.position.set(x, 3.0, -12);
+      this.scene.add(trunkS);
+      this.scene.add(leavesS);
+    }
+
+    // Add glowing streetlights along streets (X = 25, -25 channels)
+    const lightPoleGeom = new THREE.CylinderGeometry(0.08, 0.08, 4.5, 8);
+    const lightPoleMat = new THREE.MeshStandardMaterial({ color: 0x181c2b, metalness: 0.8 });
+    const lightBulbGeom = new THREE.SphereGeometry(0.35, 8, 8);
+    const lightBulbMat = new THREE.MeshBasicMaterial({ color: 0xffe600 });
+
+    for (let z = -120; z <= 120; z += 30) {
+      if (Math.abs(z) < 20) continue; // Skip river intersections
+      
+      const pole = new THREE.Mesh(lightPoleGeom, lightPoleMat);
+      pole.position.set(6, 2.25, z);
+      const bulb = new THREE.Mesh(lightBulbGeom, lightBulbMat);
+      bulb.position.set(6, 4.5, z);
+      this.scene.add(pole);
+      this.scene.add(bulb);
+    }
+  },
+
+  createPedestrians: function() {
+    const pedestrianCount = 25;
+    const geom = new THREE.SphereGeometry(0.35, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+
+    for (let i = 0; i < pedestrianCount; i++) {
+      const mesh = new THREE.Mesh(geom, mat);
+      
+      const pathType = Math.floor(Math.random() * 4);
+      let x = 0, z = 0;
+      let dir = new THREE.Vector3(0, 0, 0);
+
+      if (pathType === 0) { // North bank walk
+        x = (Math.random() - 0.5) * 200;
+        z = 11.5;
+        dir.set(Math.random() > 0.5 ? 1 : -1, 0, 0);
+      } else if (pathType === 1) { // South bank walk
+        x = (Math.random() - 0.5) * 200;
+        z = -11.5;
+        dir.set(Math.random() > 0.5 ? 1 : -1, 0, 0);
+      } else if (pathType === 2) { // Cross boulevard East
+        x = 35;
+        z = (Math.random() - 0.5) * 200;
+        dir.set(0, 0, Math.random() > 0.5 ? 1 : -1);
+      } else { // Cross boulevard West
+        x = -35;
+        z = (Math.random() - 0.5) * 200;
+        dir.set(0, 0, Math.random() > 0.5 ? 1 : -1);
+      }
+
+      mesh.position.set(x, 0.35, z);
+      this.scene.add(mesh);
+
+      this.pedestrians.push({
+        id: i + 1,
+        mesh: mesh,
+        direction: dir,
+        speed: 0.15 + Math.random() * 0.15,
+        lastDetectionTime: {}
+      });
+    }
+  },
+
   createTrafficFlow: function() {
     // Generate particles that move along the main street grid (X=0 and Z=0 axes)
     const particleCount = 150;
@@ -269,6 +395,41 @@ const City3D = {
     }
     
     this.trafficParticles.geometry.attributes.position.needsUpdate = true;
+  },
+
+  animatePedestrians: function() {
+    const now = Date.now();
+    this.pedestrians.forEach(ped => {
+      // Walk forward
+      ped.mesh.position.addScaledVector(ped.direction, ped.speed);
+
+      // Boundaries wrap-around
+      if (Math.abs(ped.mesh.position.x) > 150) ped.mesh.position.x = -ped.mesh.position.x;
+      if (Math.abs(ped.mesh.position.z) > 150) ped.mesh.position.z = -ped.mesh.position.z;
+
+      // Evaluate proximity to active issue markers
+      Object.keys(this.markers).forEach(issueId => {
+        const marker = this.markers[issueId];
+        if (!marker) return;
+
+        const dist = ped.mesh.position.distanceTo(marker.position);
+        if (dist < 10) {
+          const lastTime = ped.lastDetectionTime[issueId] || 0;
+          if (now - lastTime > 12000) { // 12 seconds cooldown per detection to avoid spam
+            ped.lastDetectionTime[issueId] = now;
+
+            // Trigger visual detection pulse
+            ped.mesh.scale.set(2, 2, 2);
+            setTimeout(() => ped.mesh.scale.set(1, 1, 1), 600);
+
+            // Call app callback
+            if (this.onSensorDetection) {
+              this.onSensorDetection(ped.id, parseInt(issueId));
+            }
+          }
+        }
+      });
+    });
   },
 
   addIssueMarker: function(issue) {
@@ -554,8 +715,30 @@ const City3D = {
       marker.position.y = 2.5 + osc;
     });
 
-    // 2. Animate traffic particles
+    // 2. Animate traffic particles & pedestrians
     this.animateTraffic();
+    this.animatePedestrians();
+
+    // Animate river waves
+    if (this.riverMesh) {
+      const positions = this.riverMesh.geometry.attributes.position.array;
+      const time = Date.now() * 0.003;
+      for (let i = 0; i < positions.length / 3; i++) {
+        const x = positions[i * 3];
+        positions[i * 3 + 2] = Math.sin(x * 0.08 + time) * 0.35;
+      }
+      this.riverMesh.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // Animate expanding scanner radar mesh
+    if (this.scannerMesh) {
+      this.scannerRadius += 0.45;
+      if (this.scannerRadius > 140) {
+        this.scannerRadius = 0.1;
+      }
+      this.scannerMesh.scale.set(this.scannerRadius, this.scannerRadius, 1);
+      this.scannerMesh.material.opacity = Math.max(0, 0.22 * (1 - this.scannerRadius / 140));
+    }
 
     // 3. Animate Rain Particles
     if ((this.weatherState === 'rain' || this.weatherState === 'storm') && this.rainSystem) {
