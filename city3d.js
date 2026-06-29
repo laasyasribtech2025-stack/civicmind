@@ -26,6 +26,7 @@ const City3D = {
   heatmapPlanes: [],
   rainSystem: null,
   weatherState: 'clear',
+  keys: {},
   
   // Animation path parameter
   pathTime: 0,
@@ -93,6 +94,14 @@ const City3D = {
 
     // 8. Handle Window Resizes
     window.addEventListener('resize', () => this.onWindowResize());
+
+    // Keyboard controls for first-person flying camera navigation
+    window.addEventListener('keydown', (e) => {
+      this.keys[e.key.toLowerCase()] = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      this.keys[e.key.toLowerCase()] = false;
+    });
 
     // 9. Start Render Loop
     this.animate();
@@ -597,6 +606,41 @@ const City3D = {
       // Look at city center (0,0,0)
       this.controls.target.set(0, 0, 0);
     } else {
+      // First-Person Keyboard Flying Controls (WASD / Arrows)
+      const speed = 0.8;
+      const direction = new THREE.Vector3();
+      this.camera.getWorldDirection(direction);
+      
+      const moveDelta = new THREE.Vector3(0, 0, 0);
+
+      if (this.keys['w'] || this.keys['arrowup']) {
+        moveDelta.addScaledVector(direction, speed);
+      }
+      if (this.keys['s'] || this.keys['arrowdown']) {
+        moveDelta.addScaledVector(direction, -speed);
+      }
+      if (this.keys['a'] || this.keys['arrowleft']) {
+        const left = new THREE.Vector3();
+        left.crossVectors(this.camera.up, direction).normalize();
+        moveDelta.addScaledVector(left, speed);
+      }
+      if (this.keys['d'] || this.keys['arrowright']) {
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, this.camera.up).normalize();
+        moveDelta.addScaledVector(right, speed);
+      }
+      if (this.keys['e']) {
+        moveDelta.y += speed * 0.7;
+      }
+      if (this.keys['q']) {
+        moveDelta.y -= speed * 0.7;
+      }
+
+      if (moveDelta.lengthSq() > 0) {
+        this.camera.position.add(moveDelta);
+        this.controls.target.add(moveDelta);
+      }
+
       this.controls.update();
     }
 
