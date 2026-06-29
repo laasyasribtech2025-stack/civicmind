@@ -331,13 +331,13 @@ body {
   border-right: 1px solid var(--border-glass);
 }
 
-.top-bar, .content-frame {
+.top-bar, .content-frame, .app-view {
   position: relative;
   z-index: 2;
   pointer-events: none;
 }
 
-.top-bar *, .content-frame * {
+.top-bar *, .glass-panel, .twin-overlay-controls, .ai-insights-panel, .feed-card, .filter-buttons, .role-selector, .user-status-card, .atmosphere-control-panel *, .rep-bar-container, .btn-tiny, .btn {
   pointer-events: auto;
 }
 
